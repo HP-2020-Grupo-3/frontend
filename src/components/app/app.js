@@ -25,7 +25,7 @@ export function App() {
             <Col xs lg="9">
               <Switch>
                 <Route
-                  path="/rubro/:id?"
+                  path="/rubro/:id?/:edit?"
                   component={Rubro} />
               </Switch>
             </Col>

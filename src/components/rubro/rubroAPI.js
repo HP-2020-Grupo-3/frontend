@@ -8,24 +8,46 @@ class RubroAPI {
   // constructor() {
   // }
 
-  static _genericRequest(endpoint) {
-    return fetch(endpoint)
+  static _genericRequest(endpoint, requestOptions={}) {
+    return fetch(RubroAPI._baseUrl + endpoint, requestOptions)
       .then(res => res.json())
       .then(
         (result) => {
+          console.log(result)
           return {error: false, result: result}
         },
         (error) => {
+          console.log(error)
           return {error: true, result: error}
           });
   }
 
   static findAll() {
-    return RubroAPI._genericRequest(RubroAPI._baseUrl + RubroAPI._endpoint)
+    return RubroAPI._genericRequest(RubroAPI._endpoint)
   }
   
   static findById(id) {
-    return RubroAPI._genericRequest(RubroAPI._baseUrl + RubroAPI._endpoint + "/" + id)
+    return RubroAPI._genericRequest(RubroAPI._endpoint + "/" + id)
+  }
+  
+  static update(dto) {
+    const requestOptions = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dto)
+    };
+    
+    return RubroAPI._genericRequest(RubroAPI._endpoint, requestOptions)
+  }
+  
+  static delete(id) {
+    const requestOptions = {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    };
+
+    return RubroAPI._genericRequest(RubroAPI._endpoint + "/" + id, requestOptions)
   }
 }
 
