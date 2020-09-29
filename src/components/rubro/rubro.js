@@ -7,6 +7,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Alert from 'react-bootstrap/Alert';
 import Modal from 'react-bootstrap/Modal';
+import { Plus } from 'react-bootstrap-icons';
 
 import RubroAPI from '../rubro/rubroAPI';
 
@@ -14,7 +15,7 @@ class Rubro extends React.Component {
   constructor(props) {
     super(props);
     this.endpoint = "http://localhost:8080/rubro";
-    this.handleUpdate = this.handleUpdate.bind(this);
+    this.handleUpsert = this.handleUpsert.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleShowModal = this.handleShowModal.bind(this);
     this.handleHideModal = this.handleHideModal.bind(this);
@@ -28,23 +29,37 @@ class Rubro extends React.Component {
     };
   }
 
+  async findAll() {
+    const response = await RubroAPI.findAll();
+    if (!response.error) {
+      this.setState({ error: false, isLoaded: true, currentView: 'list', dto: response.result});
+    } else {
+      this.setState({ error: true, isLoaded: true, currentView: 'list', dto: response.result });
+    } 
+  }
+
   async componentDidMount() {
-    if (this.props.match.params.id) {
+
+    if (!this.props.match.params.mode) {
+      this.findAll()
+    } else if (this.props.match.params.mode === "view" | this.props.match.params.mode === "edit") {
+      // TODO: Validar que exista el id if (!this.props.match.params.id) then mostrar algun error
       const response = await RubroAPI.findById(this.props.match.params.id);
       if (!response.error) {
         this.setState({ error: false, isLoaded: true, currentView: 'single', dto: response.result});
       } else {
         this.setState({ error: true, isLoaded: true, currentView: 'single', dto: response.result });
-      } 
-    } else {
-      const response = await RubroAPI.findAll();
+      }
+      this.setState({ "editable" : this.props.match.params.mode === "edit" });
+    } else if (this.props.match.params.mode === "new") {
+      const response = await RubroAPI.base(this.props.match.params.id);
       if (!response.error) {
-        this.setState({ error: false, isLoaded: true, currentView: 'list', dto: response.result});
+        this.setState({ error: false, isLoaded: true, currentView: 'single', dto: response.result});
       } else {
-        this.setState({ error: true, isLoaded: true, currentView: 'list', dto: response.result });
-      } 
+        this.setState({ error: true, isLoaded: true, currentView: 'single', dto: response.result });
+      }
+      this.setState({ "editable" : true });
     }
-    this.setState({ "editable" : this.props.match.params.edit === "edit" });
   }
 
   handleChange(event) {
@@ -53,17 +68,25 @@ class Rubro extends React.Component {
     this.setState({dto: dto});
   }
 
-  async handleUpdate() {
+  async handleUpsert() {
     const { dto } = this.state;
     
-    var response = await RubroAPI.update(dto);
+    var response;
+    if (dto.id) {
+      response = await RubroAPI.update(dto);
+    } else {
+      response = await RubroAPI.save(dto);
+    }
 
     if (! response.error) {
-      this.setState({alert: (
+      this.setState({
+        alert: (
         <Alert key="0" variant="success">
           El rubro se guardo correctamente.
         </Alert>
-      )})
+        ),
+        dto: response.result
+      })
     } else {
       this.setState({alert: (
         <Alert key="0" variant="danger">
@@ -88,7 +111,8 @@ class Rubro extends React.Component {
         </Alert>),
         idToDelete: null,
         showModal: false
-      })
+      });
+      this.findAll()
     } else {
       this.setState({
         alert: (
@@ -130,6 +154,7 @@ class Rubro extends React.Component {
             </Button>
           </Modal.Footer>
         </Modal>
+        <h1>Rubros<Button variant="primary" href={"/rubro/new"} ><Plus size={25}/></Button></h1>
         {alert}
         <Table striped bordered hover>
         <thead>
@@ -147,12 +172,12 @@ class Rubro extends React.Component {
                 <td>
                 <ButtonGroup>
                   <Button 
-                    variant="primary" href={"/rubro/" + rubro.id} >Ver</Button>
+                    variant="primary" href={"/rubro/view/" + rubro.id} >Ver</Button>
                   <Button 
-                    variant="primary" href={"/rubro/" + rubro.id + "/edit"} >Editar</Button>
+                    variant="primary" href={"/rubro/edit/" + rubro.id} >Editar</Button>
                   <Button 
                     id={"delete.rubro." + rubro.id} variant="danger" onClick={this.handleShowModal} >Eliminar</Button>
-                  </ButtonGroup>
+                </ButtonGroup>
                 </td>
                 </tr>
             )}
@@ -190,7 +215,7 @@ class Rubro extends React.Component {
             </Button>
           </Col>
           <Col sm="6">
-            <Button variant="success" onClick={this.handleUpdate}>
+            <Button variant="success" onClick={this.handleUpsert}>
               Guardar
             </Button>
           </Col>
@@ -200,7 +225,7 @@ class Rubro extends React.Component {
   }
 
   render() {
-    const { error, isLoaded, dto, currentView} = this.state;
+    const { error, isLoaded, currentView} = this.state;
     if (error) {
       return <div>Error: {error.message}</div>;
     } else if (!isLoaded) {
