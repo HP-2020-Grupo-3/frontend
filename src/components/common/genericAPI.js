@@ -21,7 +21,7 @@ class GenericAPI {
       return this._genericRequest(this._endpoint)
     }
     
-    static base() {
+    static getBaseDto() {
       return this._genericRequest(this._endpoint + "/new")
     }
     

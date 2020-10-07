@@ -1,4 +1,5 @@
 import React from 'react';
+import GenericComponent from "../common/genericComponent";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -11,53 +12,27 @@ import { Plus } from 'react-bootstrap-icons';
 
 import RubroAPI from '../rubro/rubroAPI';
 
-class Rubro extends React.Component {
+class Rubro extends GenericComponent {
   constructor(props) {
     super(props);
-    this.endpoint = "http://localhost:8080/rubro";
+    this.api = RubroAPI;
     this.handleUpsert = this.handleUpsert.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleShowModal = this.handleShowModal.bind(this);
     this.handleHideModal = this.handleHideModal.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
-    this.state = {
-      error: null,
-      isLoaded: false,
-      dto: null,
-      alert: null,
-      showModal: false,
-    };
-  }
-
-  async findAll() {
-    const response = await RubroAPI.findAll();
-    if (!response.error) {
-      this.setState({ error: false, isLoaded: true, currentView: 'list', dto: response.result});
-    } else {
-      this.setState({ error: true, isLoaded: true, currentView: 'list', dto: response.result });
-    } 
   }
 
   async componentDidMount() {
 
     if (!this.props.match.params.mode) {
-      this.findAll()
+      this.findAll();
     } else if (this.props.match.params.mode === "view" | this.props.match.params.mode === "edit") {
       // TODO: Validar que exista el id if (!this.props.match.params.id) then mostrar algun error
-      const response = await RubroAPI.findById(this.props.match.params.id);
-      if (!response.error) {
-        this.setState({ error: false, isLoaded: true, currentView: 'single', dto: response.result});
-      } else {
-        this.setState({ error: true, isLoaded: true, currentView: 'single', dto: response.result });
-      }
+      this.findById(this.props.match.params.id);
       this.setState({ "editable" : this.props.match.params.mode === "edit" });
     } else if (this.props.match.params.mode === "new") {
-      const response = await RubroAPI.base(this.props.match.params.id);
-      if (!response.error) {
-        this.setState({ error: false, isLoaded: true, currentView: 'single', dto: response.result});
-      } else {
-        this.setState({ error: true, isLoaded: true, currentView: 'single', dto: response.result });
-      }
+      this.getBaseDto();
       this.setState({ "editable" : true });
     }
   }
@@ -73,9 +48,9 @@ class Rubro extends React.Component {
     
     var response;
     if (dto.id) {
-      response = await RubroAPI.update(dto);
+      response = await this.api.update(dto);
     } else {
-      response = await RubroAPI.save(dto);
+      response = await this.api.save(dto);
     }
 
     if (! response.error) {
@@ -100,7 +75,7 @@ class Rubro extends React.Component {
   async handleDelete() {
     const { idToDelete } = this.state;
     
-    var response = await RubroAPI.delete(idToDelete);
+    var response = await this.api.delete(idToDelete);
 
 
     if (! response.error) {
