@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import './app.css';
 import Navegacion from '../navbar/navbar'
 import Rubro from '../rubro/rubro'
+import Usuario from '../usuario/usuario'
 
 export function App() {
   return (
@@ -23,6 +24,7 @@ export function App() {
             <Col xs lg="3">
             <ListGroup variant="flush">
               <ListGroup.Item><a href="/rubro/">Rubros</a></ListGroup.Item>
+              <ListGroup.Item><a href="/usuario/">Usuarios</a></ListGroup.Item>
             </ListGroup>
             </Col>
             <Col xs lg="9">
@@ -30,6 +32,11 @@ export function App() {
                 <Route
                   path="/rubro/:mode?/:id?"
                   component={Rubro} />
+              </Switch>
+              <Switch>
+                <Route
+                  path="/usuario/:mode?/:id?"
+                  component={Usuario} />
               </Switch>
             </Col>
           </Row>
