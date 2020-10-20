@@ -39,12 +39,20 @@ class Usuario extends GenericComponent {
 
   handleChange(event) {
     const dto = this.state.dto;
+    const id = event.target.id;
+   
+
     
-    dto.nombre = "jose";
-    
-    dto.password = event.target.value;
-    dto.email = event.target.value;
+    if (id === "1"){
+      dto.nombre=event.target.value;      
+    } else if (id === "2"){
+      dto.password = event.target.value;
+    } else if (id === "3"){
+      dto.email = event.target.value;
+    } 
+          
     this.setState({dto: dto});
+
   }
 
   async handleUpsert() {
@@ -77,11 +85,12 @@ class Usuario extends GenericComponent {
   }
 
   async handleDelete() {
+    // error con FK domicilio
+
     const { idToDelete } = this.state;
     
     var response = await this.api.delete(idToDelete);
-
-
+    
     if (! response.error) {
       this.setState({
         alert: (
@@ -172,8 +181,7 @@ class Usuario extends GenericComponent {
 
   renderSingle() {
     const { dto, editable, alert } = this.state;
-    var n;
-    var p;
+    
     return (
       <Form>
         {alert}
@@ -190,7 +198,7 @@ class Usuario extends GenericComponent {
             Nombre
           </Form.Label>
           <Col sm="10">
-            <Form.Control type="text" name="n" readOnly={!editable} defaultValue={dto.nombre} onChange={this.handleChange}/>
+            <Form.Control type="text" id="1"  readOnly={!editable} defaultValue={dto.nombre} onChange={this.handleChange}/>
           </Col>
         </Form.Group>
         <Form.Group as={Row} controlId="usuario">
@@ -198,7 +206,7 @@ class Usuario extends GenericComponent {
             Password
           </Form.Label>
           <Col sm="10">
-            <Form.Control type="text" name="p" readOnly={!editable} defaultValue={dto.password} onChange={this.handleChange}/>
+            <Form.Control type="text" id="2" readOnly={!editable} defaultValue={dto.password} onChange={this.handleChange}/>
           </Col>
           </Form.Group>
           <Form.Group as={Row} controlId="usuario">
@@ -206,7 +214,7 @@ class Usuario extends GenericComponent {
             E-Mail
           </Form.Label>
           <Col sm="10">
-            <Form.Control type="text" readOnly={!editable} defaultValue={dto.email} onChange={this.handleChange.bind(this)}/>
+            <Form.Control type="text" id="3" readOnly={!editable} defaultValue={dto.email} onChange={this.handleChange}/>
           </Col> 
         </Form.Group>
         <Form.Group as={Row} controlId="usuario">
