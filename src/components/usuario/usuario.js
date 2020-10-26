@@ -43,11 +43,11 @@ class Usuario extends GenericComponent {
    
 
     
-    if (id === "1"){
+    if (id === "usuario.nombre"){
       dto.nombre=event.target.value;      
-    } else if (id === "2"){
+    } else if (id === "usuario.password"){      
       dto.password = event.target.value;
-    } else if (id === "3"){
+    } else if (id === "usuario.email"){
       dto.email = event.target.value;
     } 
           
@@ -198,7 +198,7 @@ class Usuario extends GenericComponent {
             Nombre
           </Form.Label>
           <Col sm="10">
-            <Form.Control type="text" id="1"  readOnly={!editable} defaultValue={dto.nombre} onChange={this.handleChange}/>
+            <Form.Control type="text" id="usuario.nombre"  readOnly={!editable} defaultValue={dto.nombre} onChange={this.handleChange}/>
           </Col>
         </Form.Group>
         <Form.Group as={Row} controlId="usuario">
@@ -206,7 +206,7 @@ class Usuario extends GenericComponent {
             Password
           </Form.Label>
           <Col sm="10">
-            <Form.Control type="text" id="2" readOnly={!editable} defaultValue={dto.password} onChange={this.handleChange}/>
+            <Form.Control type="text" id="usuario.password" readOnly={!editable} defaultValue={dto.password} onChange={this.handleChange}/>
           </Col>
           </Form.Group>
           <Form.Group as={Row} controlId="usuario">
@@ -214,7 +214,7 @@ class Usuario extends GenericComponent {
             E-Mail
           </Form.Label>
           <Col sm="10">
-            <Form.Control type="text" id="3" readOnly={!editable} defaultValue={dto.email} onChange={this.handleChange}/>
+            <Form.Control type="text" id="usuario.email" readOnly={!editable} defaultValue={dto.email} onChange={this.handleChange}/>
           </Col> 
         </Form.Group>
         <Form.Group as={Row} controlId="usuario">
