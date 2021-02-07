@@ -24,6 +24,7 @@ class Menu extends React.Component {
           <ListGroup variant="flush">
             <ListGroup.Item><a href="/rubro/">Rubros</a></ListGroup.Item>
             <ListGroup.Item><a href="/usuario/">Usuarios</a></ListGroup.Item>
+            <ListGroup.Item><a href="/articulo/">Artículos</a></ListGroup.Item>
           </ListGroup>
         </Col>
       );

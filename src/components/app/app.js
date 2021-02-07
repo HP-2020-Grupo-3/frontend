@@ -11,6 +11,7 @@ import Shop from '../shop/shop'
 import Login from '../security/login';
 
 import Usuario from '../usuario/usuario'
+import Articulo from '../articulo/articulo'
 
 export function App() {
   return (
@@ -39,6 +40,11 @@ export function App() {
                 <Route
                   path="/usuario/:mode?/:id?"
                   component={Usuario} />
+              </Switch>
+              <Switch>
+                <Route
+                  path="/articulo/:mode?/:id?"
+                  component={Articulo} />
               </Switch>
             </Col>
           </Row>
