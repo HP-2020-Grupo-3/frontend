@@ -1,18 +1,31 @@
+import SecurityContext from '../security/securityContext'
 
 
 class GenericAPI {
     static _baseUrl = "http://localhost:8080/";
  
     static _genericRequest(endpoint, requestOptions={}) {
+
+      if (SecurityContext.getPrincipal()) {
+        if (!requestOptions["headers"]) {
+          requestOptions.headers = {};
+        }
+        requestOptions.headers.Authorization = SecurityContext.getPrincipal().token;
+      }
       return fetch(this._baseUrl + endpoint, requestOptions)
         .then(res => res.json())
         .then(
           (result) => {
-            console.log(result)
-            return {error: false, result: result}
+            if (!result.error) {
+              console.log("Request result: " + JSON.stringify(result));
+              return {error: false, result: result}              
+            } else {
+              console.log("Request failed: " + JSON.stringify(result));
+              return {error: true, result: result}              
+            }
           },
           (error) => {
-            console.log(error)
+            console.log("Request error: " + JSON.stringify(error))
             return {error: true, result: error}
             });
     }
