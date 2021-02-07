@@ -200,9 +200,9 @@ class Rubro extends GenericComponent {
   }
 
   render() {
-    const { error, isLoaded, currentView} = this.state;
+    const { error, isLoaded, currentView, dto} = this.state;
     if (error) {
-      return <div>Error: {error.message}</div>;
+      return <div>Error: {dto.error}</div>;
     } else if (!isLoaded) {
       return <div>Loading...</div>;
     } else {
