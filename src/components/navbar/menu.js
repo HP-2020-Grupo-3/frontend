@@ -22,7 +22,8 @@ class Menu extends React.Component {
       return (
         <Col xs lg="3"> {/* MENU */}
           <ListGroup variant="flush">
-          <ListGroup.Item><a href="/rubro/">Rubros</a></ListGroup.Item>
+            <ListGroup.Item><a href="/rubro/">Rubros</a></ListGroup.Item>
+            <ListGroup.Item><a href="/usuario/">Usuarios</a></ListGroup.Item>
           </ListGroup>
         </Col>
       );

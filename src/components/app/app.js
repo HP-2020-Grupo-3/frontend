@@ -10,6 +10,7 @@ import Rubro from '../rubro/rubro'
 import Shop from '../shop/shop'
 import Login from '../security/login';
 
+import Usuario from '../usuario/usuario'
 
 export function App() {
   return (
@@ -35,6 +36,9 @@ export function App() {
                 <Route
                   path="/shop"
                   component={Shop} />
+                <Route
+                  path="/usuario/:mode?/:id?"
+                  component={Usuario} />
               </Switch>
             </Col>
           </Row>

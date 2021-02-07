@@ -57,8 +57,7 @@ class GenericAPI {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
-      };
-  
+        };
       return this._genericRequest(this._endpoint + "/" + id, requestOptions)
     }
 
