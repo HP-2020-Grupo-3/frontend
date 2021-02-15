@@ -19,36 +19,35 @@ export function App() {
       <div className="App">
         <Container>
           <Navegacion />
-          <Row className="justify-content-md-center">
-            <Col xs lg="12">
-              <h1>Veni de Mary</h1>
-            </Col>
-          </Row>
-          <Row className="justify-content-md-center">
-            <Menu />
-            <Col xs lg="9">
+          <section class="categories-slider-area bg__white">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-3 col-lg-3 col-sm-4 col-xs-12 float-rigth-style">
+              <Menu />
+            </div>
+            <div class="col-md-9 col-lg-9 col-sm-8 col-xs-12 float-left-style">
               <Switch>
-                <Route
-                  path="/rubro/:mode?/:id?"
-                  component={Rubro} />
-                <Route
-                  path="/login"
-                  component={Login} />
-                <Route
-                  path="/shop"
-                  component={Shop} />
-                <Route
-                  path="/usuario/:mode?/:id?"
-                  component={Usuario} />
-              </Switch>
-              <Switch>
-                <Route
-                  path="/articulo/:mode?/:id?"
-                  component={Articulo} />
-              </Switch>
-            </Col>
-          </Row>
-        </Container>
+                  <Route
+                    path="/rubro/:mode?/:id?"
+                    component={Rubro} />
+                  <Route
+                    path="/login"
+                    component={Login} />
+                  <Route
+                    path="/shop"
+                    component={Shop} />
+                  <Route
+                    path="/usuario/:mode?/:id?"
+                    component={Usuario} />
+                  <Route
+                    path="/articulo/:mode?/:id?"
+                    component={Articulo} />
+                </Switch>
+            </div>
+          </div>
+        </div>
+      </section>
+      </Container>
       </div>
     </BrowserRouter>
   );

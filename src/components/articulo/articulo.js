@@ -39,35 +39,19 @@ class Articulo extends GenericComponent {
   }
 
   createSelectItems() {
-    // SEGUIR ACA!!!
     let items = [];
     
     let rubros=RubroAPI.findAll();
     console.log(rubros.length);
     items.push(<option key={1} value={1}>{"GENERICO"}</option>);
     items.push(<option key={2} value={2}>{"GENERICO 2"}</option>);
-    //items.push(<option key={1} value={1}>{rubros[1].nombre}</option>);
-/*
-    for (let i = 0; i <= rubros.length; i++) {             
-         items.push(<option key={i} value={i}>{rubros[i].nombre}</option>); 
-         console.log(rubros[i].nombre);  
-         //here I will be creating my options dynamically based on
-         //what props are currently passed to the parent component
-    }
-  */
+
     return items;
   }  
-
-  onDropdownSelected(e) {
-    console.log("THE VAL", e.target.value);
-    //here you will see the current selected value of the select input
-  }
 
   handleChange(event) {
     const dto = this.state.dto;
     const id = event.target.id;
-   
-
     
     if (id === "articulo.nombre"){
       dto.nombre=event.target.value;      
@@ -79,6 +63,8 @@ class Articulo extends GenericComponent {
       dto.stockActual = event.target.value;
     } else if (id === "articulo.stockDeseado"){
       dto.stockDeseado = event.target.value;
+    } else if (id === "articulo.rubro"){
+      dto.currentRubro = dto.availableRubros.find(r => r.id.toString() === event.target.value)
     } 
           
     this.setState({dto: dto});
@@ -115,8 +101,6 @@ class Articulo extends GenericComponent {
   }
 
   async handleDelete() {
-    
-
     const { idToDelete } = this.state;
     
     var response = await this.api.delete(idToDelete);
@@ -275,7 +259,19 @@ class Articulo extends GenericComponent {
             Rubro
           </Form.Label>
           <Col sm="10">
-            <Form.Control as="Select" type="text" id="articulo.rubro" readOnly={!editable} defaultValue={"GENERICO"} onChange={this.handleChange}/>
+            <Form.Control as="Select" type="text" 
+              id="articulo.rubro"
+              disabled={!editable}
+              onChange={this.handleChange}>
+            <option key={dto.currentRubro.id} value={dto.currentRubro.id}>{dto.currentRubro.nombre}</option>
+            {
+              dto.availableRubros ?
+                dto.availableRubros.filter(r => r.id !== dto.currentRubro.id).map( (availableRubro) => {
+                  return (<option key={availableRubro.id} value={availableRubro.id}>{availableRubro.nombre}</option>)
+                })
+              : (<option value="-1">Sin rubro</option>)
+            }
+            </Form.Control>
             
             
           </Col> 
@@ -287,7 +283,7 @@ class Articulo extends GenericComponent {
             </Button>
           </Col>
           <Col sm="6">
-            <Button variant="success" onClick={this.handleUpsert}>
+            <Button variant="success" hidden={!editable} onClick={this.handleUpsert}>
               Guardar
             </Button>
           </Col>

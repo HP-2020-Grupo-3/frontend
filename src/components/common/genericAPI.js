@@ -12,6 +12,8 @@ class GenericAPI {
         }
         requestOptions.headers.Authorization = SecurityContext.getPrincipal().token;
       }
+      console.log("Request endpoint: " + this._baseUrl + endpoint);
+      console.log("Request options: " + JSON.stringify(requestOptions));
       return fetch(this._baseUrl + endpoint, requestOptions)
         .then(res => res.json())
         .then(
@@ -23,11 +25,12 @@ class GenericAPI {
               console.log("Request failed: " + JSON.stringify(result));
               return {error: true, result: result}              
             }
-          },
-          (error) => {
+          })
+          .catch((error) => {
             console.log("Request error: " + JSON.stringify(error))
             return {error: true, result: error}
-            });
+            }
+          );
     }
   
     static findAll() {

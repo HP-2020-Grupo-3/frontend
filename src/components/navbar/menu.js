@@ -20,13 +20,18 @@ class Menu extends React.Component {
     // FIXME: comprobacion del rol super trucha, hay que mejorar esto
     if (SecurityContext.getPrincipal() && SecurityContext.getPrincipal().role != "ROLE_USER") {
       return (
-        <Col xs lg="3"> {/* MENU */}
-          <ListGroup variant="flush">
-            <ListGroup.Item><a href="/rubro/">Rubros</a></ListGroup.Item>
-            <ListGroup.Item><a href="/usuario/">Usuarios</a></ListGroup.Item>
-            <ListGroup.Item><a href="/articulo/">Artículos</a></ListGroup.Item>
-          </ListGroup>
-        </Col>
+        <div class="categories-menu mrg-xs">
+            <div class="category-heading">
+                <h3> Menu</h3>
+            </div>
+            <div class="category-menu-list ">
+              <ul>
+                <li><a href="/rubro/">Rubros</a></li>
+                <li><a href="/usuario/">Usuarios</a></li>
+                <li><a href="/articulo/">Artículos</a></li>
+              </ul>
+            </div>
+          </div>
       );
     } else {
       return null
