@@ -1,4 +1,5 @@
 import React from 'react';
+import Form from 'react-bootstrap/Form';
 
 
 class GenericComponent extends React.Component {
@@ -50,6 +51,26 @@ class GenericComponent extends React.Component {
       this.errorHandler(response.result);
       this.setState({ error: true, isLoaded: true, currentView: 'single', dto: response.result });
     }
+  }
+
+  // UI Functions
+
+  renderComboBox(id, currentItem, availableItems, editable, displayProperty = "nombre") {
+    return (
+    <Form.Control as="Select" type="text" 
+      id={id}
+      disabled={!editable}
+      onChange={this.handleChange}>
+    <option key={currentItem.id} value={currentItem.id}>{currentItem.nombre}</option>
+    {
+      availableItems ?
+        availableItems.filter(r => r.id !== currentItem.id).map( (availableItem) => {
+          return (<option key={availableItem.id} value={availableItem.id}>{availableItem[displayProperty]}</option>)
+        })
+      : (<option value="-1">Sin datos</option>)
+    }
+    </Form.Control>
+    )
   }
 
 }

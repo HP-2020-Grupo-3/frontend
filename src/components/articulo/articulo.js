@@ -259,21 +259,7 @@ class Articulo extends GenericComponent {
             Rubro
           </Form.Label>
           <Col sm="10">
-            <Form.Control as="Select" type="text" 
-              id="articulo.rubro"
-              disabled={!editable}
-              onChange={this.handleChange}>
-            <option key={dto.currentRubro.id} value={dto.currentRubro.id}>{dto.currentRubro.nombre}</option>
-            {
-              dto.availableRubros ?
-                dto.availableRubros.filter(r => r.id !== dto.currentRubro.id).map( (availableRubro) => {
-                  return (<option key={availableRubro.id} value={availableRubro.id}>{availableRubro.nombre}</option>)
-                })
-              : (<option value="-1">Sin rubro</option>)
-            }
-            </Form.Control>
-            
-            
+            {this.renderComboBox("articulo.rubro", dto.currentRubro, dto.availableRubros, editable)}
           </Col> 
         </Form.Group>
         <Form.Group as={Row} controlId="articulo">
