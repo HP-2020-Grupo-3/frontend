@@ -56,12 +56,33 @@ class GenericComponent extends React.Component {
   // UI Functions
 
   renderComboBox(id, currentItem, availableItems, editable, displayProperty = "nombre") {
+
     return (
     <Form.Control as="Select" type="text" 
       id={id}
       disabled={!editable}
       onChange={this.handleChange}>
     <option key={currentItem.id} value={currentItem.id}>{currentItem.nombre}</option>
+    {
+      availableItems ?
+        availableItems.filter(r => r.id !== currentItem.id).map( (availableItem) => {
+          return (<option key={availableItem.id} value={availableItem.id}>{availableItem[displayProperty]}</option>)
+        })
+      : (<option value="-1">Sin datos</option>)
+    }
+    </Form.Control>
+    )
+  }
+
+  // Incorporar a funcion anterior, displayPorperty tiene más de un valor
+  renderComboBoxUsuario(id, currentItem, availableItems, editable, displayProperty = "name") {
+
+    return (
+    <Form.Control as="Select" type="text" 
+      id={id}
+      disabled={!editable}
+      onChange={this.handleChange}>
+    <option key={currentItem.id} value={currentItem.id}>{currentItem.name}</option>
     {
       availableItems ?
         availableItems.filter(r => r.id !== currentItem.id).map( (availableItem) => {

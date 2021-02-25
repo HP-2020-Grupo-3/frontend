@@ -43,12 +43,18 @@ class Usuario extends GenericComponent {
    
 
     
-    if (id === "usuario.nombre"){
-      dto.nombre=event.target.value;      
+    if (id === "usuario.username"){
+      dto.username = event.target.value;      
     } else if (id === "usuario.password"){      
       dto.password = event.target.value;
+    } else if (id === "usuario.nombre"){
+      dto.nombre = event.target.value;
+    } else if (id=== "usuario.apellido"){
+      dto.apellido = event.target.value;
     } else if (id === "usuario.email"){
       dto.email = event.target.value;
+    } else if (id === "usuario.role"){
+      dto.currentRole = dto.availableRoles.find(r => r.id.toString() === event.target.value)
     } 
           
     this.setState({dto: dto});
@@ -148,9 +154,12 @@ class Usuario extends GenericComponent {
         <thead>
             <tr>
             <th>#</th>
-            <th>Nombre</th>
+            <th>Nombre de usuario</th>
             <th>Password</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
             <th>E-Mail</th>
+            <th>Rol</th>
             <th>Acciones</th>
             </tr>
         </thead>
@@ -158,9 +167,12 @@ class Usuario extends GenericComponent {
             {dto.map((usuario) =>
                 <tr>
                 <td>{usuario.id}</td>
-                <td>{usuario.nombre}</td>
+                <td>{usuario.username}</td>
                 <td>{usuario.password}</td>
+                <td>{usuario.nombre}</td>
+                <td>{usuario.apellido}</td>
                 <td>{usuario.email}</td>
+                <td>{usuario.role.name}</td>
                 <td>
                 <ButtonGroup>
                   <Button 
@@ -181,7 +193,7 @@ class Usuario extends GenericComponent {
 
   renderSingle() {
     const { dto, editable, alert } = this.state;
-    
+
     return (
       <Form>
         {alert}
@@ -195,10 +207,10 @@ class Usuario extends GenericComponent {
         </Form.Group>
         <Form.Group as={Row} controlId="usuario">
           <Form.Label column sm="2">
-            Nombre
+            Nombre de usuario
           </Form.Label>
           <Col sm="10">
-            <Form.Control type="text" id="usuario.nombre"  readOnly={!editable} defaultValue={dto.nombre} onChange={this.handleChange}/>
+            <Form.Control type="text" id="usuario.username"  readOnly={!editable} defaultValue={dto.username} onChange={this.handleChange}/>
           </Col>
         </Form.Group>
         <Form.Group as={Row} controlId="usuario">
@@ -208,13 +220,37 @@ class Usuario extends GenericComponent {
           <Col sm="10">
             <Form.Control type="text" id="usuario.password" readOnly={!editable} defaultValue={dto.password} onChange={this.handleChange}/>
           </Col>
-          </Form.Group>
-          <Form.Group as={Row} controlId="usuario">
+        </Form.Group>
+        <Form.Group as={Row} controlId="usuario">
+          <Form.Label column sm="2">
+            Nombre
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control type="text" id="usuario.nombre" readOnly={!editable} defaultValue={dto.nombre} onChange={this.handleChange}/>
+          </Col>
+        </Form.Group>
+        <Form.Group as={Row} controlId="usuario">
+          <Form.Label column sm="2">
+            Apellido
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control type="text" id="usuario.apellido" readOnly={!editable} defaultValue={dto.apellido} onChange={this.handleChange}/>
+          </Col> 
+        </Form.Group>
+        <Form.Group as={Row} controlId="usuario">
           <Form.Label column sm="2">
             E-Mail
           </Form.Label>
           <Col sm="10">
             <Form.Control type="text" id="usuario.email" readOnly={!editable} defaultValue={dto.email} onChange={this.handleChange}/>
+          </Col> 
+        </Form.Group>
+        <Form.Group as={Row} controlId="usuario">
+          <Form.Label column sm="2">
+            Rol
+          </Form.Label>
+          <Col sm="10">
+            {this.renderComboBoxUsuario("usuario.role", dto.currentRole, dto.availableRoles, editable)}
           </Col> 
         </Form.Group>
         <Form.Group as={Row} controlId="usuario">
@@ -224,7 +260,7 @@ class Usuario extends GenericComponent {
             </Button>
           </Col>
           <Col sm="6">
-            <Button variant="success" onClick={this.handleUpsert}>
+            <Button variant="success" hidden={!editable} onClick={this.handleUpsert}>
               Guardar
             </Button>
           </Col>
