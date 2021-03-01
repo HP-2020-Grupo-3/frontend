@@ -1,5 +1,8 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import { Trash, Pencil, ZoomIn } from 'react-bootstrap-icons';
 
 
 class GenericComponent extends React.Component {
@@ -56,42 +59,49 @@ class GenericComponent extends React.Component {
   // UI Functions
 
   renderComboBox(id, currentItem, availableItems, editable, displayProperty = "nombre") {
-
     return (
     <Form.Control as="Select" type="text" 
       id={id}
       disabled={!editable}
       onChange={this.handleChange}>
-    <option key={currentItem.id} value={currentItem.id}>{currentItem.nombre}</option>
-    {
-      availableItems ?
-        availableItems.filter(r => r.id !== currentItem.id).map( (availableItem) => {
-          return (<option key={availableItem.id} value={availableItem.id}>{availableItem[displayProperty]}</option>)
-        })
-      : (<option value="-1">Sin datos</option>)
-    }
+        <option key={currentItem.id} value={JSON.stringify(currentItem)}>{currentItem[displayProperty]}</option>
+ 
+      { availableItems ?
+          availableItems
+            .filter(r => r.id !== currentItem.id)
+            .sort( (a, b) => {
+              if (a[displayProperty] > b[displayProperty]) {
+                return 1;
+              } else {
+                return -1
+              }
+            } )
+            .map( (availableItem) => {
+            return (<option key={availableItem.id} value={JSON.stringify(availableItem)}>{availableItem[displayProperty]}</option>)
+          })
+        : (<option value="-1">Sin datos</option>)
+      }
     </Form.Control>
     )
   }
 
-  // Incorporar a funcion anterior, displayPorperty tiene más de un valor
-  renderComboBoxUsuario(id, currentItem, availableItems, editable, displayProperty = "name") {
+  // renderActionButtonGroup(id) {
+  //   return (
+  //     <ButtonGroup>
+  //       <Button 
+  //         variant="primary" href={"/articulo/view/" + id} ><ZoomIn size={20}/></Button>
+  //       <Button 
+  //         variant="primary" href={"/articulo/edit/" + id} ><Pencil size={20}/></Button>
+  //       <Button 
+  //         id={"delete.articulo." + id} variant="danger" onClick={this.handleShowModal} ><Trash size={20}/></Button>
+  //     </ButtonGroup>
+  //   )
+  // }
 
-    return (
-    <Form.Control as="Select" type="text" 
-      id={id}
-      disabled={!editable}
-      onChange={this.handleChange}>
-    <option key={currentItem.id} value={currentItem.id}>{currentItem.name}</option>
-    {
-      availableItems ?
-        availableItems.filter(r => r.id !== currentItem.id).map( (availableItem) => {
-          return (<option key={availableItem.id} value={availableItem.id}>{availableItem[displayProperty]}</option>)
-        })
-      : (<option value="-1">Sin datos</option>)
-    }
-    </Form.Control>
-    )
+  // Format Functions
+
+  formatCurrency(number) {
+    return "$ " + number.toFixed(2);
   }
 
 }

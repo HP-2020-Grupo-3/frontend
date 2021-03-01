@@ -8,7 +8,8 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Alert from 'react-bootstrap/Alert';
 import Modal from 'react-bootstrap/Modal';
-import { Plus } from 'react-bootstrap-icons';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { Plus, Trash, Pencil, ZoomIn } from 'react-bootstrap-icons';
 import RubroAPI from '../rubro/rubroAPI';
 import ArticuloAPI from '../articulo/articuloAPI';
 
@@ -57,6 +58,8 @@ class Articulo extends GenericComponent {
       dto.nombre=event.target.value;      
     } else if (id === "articulo.descripcion"){      
       dto.descripcion = event.target.value;
+    } else if (id === "articulo.precio"){      
+      dto.precio = event.target.value;
     } else if (id === "articulo.imagen"){
       dto.imagen = event.target.value;
     } else if (id === "articulo.stockActual"){
@@ -132,7 +135,7 @@ class Articulo extends GenericComponent {
       showModal: true,
       idToDelete: (event.target.id).split(".")[2]
     })
-  }  
+  }
   
   handleHideModal() {
     this.setState({
@@ -164,9 +167,9 @@ class Articulo extends GenericComponent {
             <th>#</th>
             <th>Nombre</th>
             <th>Descripción</th>
-            <th>Imagen</th>
-            <th>Stock Actual</th>
-            <th>Stock Deseado</th>
+            <th>Precio</th>
+            <th>St. Act.</th>
+            <th>St. Des.</th>
             <th>Rubro</th>
             <th>Acciones</th>
             </tr>
@@ -177,19 +180,19 @@ class Articulo extends GenericComponent {
                 <td>{articulo.id}</td>
                 <td>{articulo.nombre}</td>
                 <td>{articulo.descripcion}</td>
-                <td>{articulo.imagen}</td>
+                <td>$ {articulo.precio.toFixed(2)}</td>
                 <td>{articulo.stockActual}</td>
                 <td>{articulo.stockDeseado}</td>
-                <td>{articulo.rubro.nombre}</td>
+                <td>{articulo.currentRubro.nombre}</td>
                 <td>
-                <ButtonGroup>
-                  <Button 
-                    variant="primary" href={"/articulo/view/" + articulo.id} >Ver</Button>
-                  <Button 
-                    variant="primary" href={"/articulo/edit/" + articulo.id} >Editar</Button>
-                  <Button 
-                    id={"delete.articulo." + articulo.id} variant="danger" onClick={this.handleShowModal} >Eliminar</Button>
-                </ButtonGroup>
+                  <ButtonGroup>
+                    <Button 
+                      variant="primary" href={"/articulo/view/" + articulo.id} ><ZoomIn size={20}/></Button>
+                    <Button 
+                      variant="primary" href={"/articulo/edit/" + articulo.id} ><Pencil size={20}/></Button>
+                    <Button 
+                      id={"delete.articulo." + articulo.id} variant="danger" onClick={this.handleShowModal} ><Trash size={20}/></Button>
+                  </ButtonGroup>
                 </td>
                 </tr>
             )}
@@ -228,6 +231,19 @@ class Articulo extends GenericComponent {
           </Form.Label>
           <Col sm="10">
             <Form.Control type="text" id="articulo.descripcion" readOnly={!editable} defaultValue={dto.descripcion} onChange={this.handleChange}/>
+          </Col>
+          </Form.Group>
+        <Form.Group as={Row} controlId="articulo">
+          <Form.Label column sm="2">
+            Precio
+          </Form.Label>
+          <Col sm="10">
+          <InputGroup>
+            <InputGroup.Prepend>
+              <InputGroup.Text>$</InputGroup.Text>
+            </InputGroup.Prepend>
+              <Form.Control type="number" step={0.1} id="articulo.precio" readOnly={!editable} value={dto.precio} onChange={this.handleChange}/>
+          </InputGroup>
           </Col>
           </Form.Group>
           <Form.Group as={Row} controlId="articulo">
@@ -279,9 +295,10 @@ class Articulo extends GenericComponent {
   }
 
   render() {
-    const { error, isLoaded, currentView} = this.state;
+    const { error, isLoaded, currentView, dto} = this.state;
     if (error) {
-      return <div>Error: {error.message}</div>;
+      console.log(dto);
+      return <div>Error: {dto.message}</div>;
     } else if (!isLoaded) {
       return <div>Loading...</div>;
     } else {

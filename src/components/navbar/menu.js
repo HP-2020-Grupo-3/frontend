@@ -26,6 +26,7 @@ class Menu extends React.Component {
             </div>
             <div class="category-menu-list ">
               <ul>
+                <li><a href="/venta/">Ventas</a></li>
                 <li><a href="/rubro/">Rubros</a></li>
                 <li><a href="/usuario/">Usuarios</a></li>
                 <li><a href="/articulo/">Artículos</a></li>

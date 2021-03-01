@@ -12,6 +12,7 @@ import Login from '../security/login';
 
 import Usuario from '../usuario/usuario'
 import Articulo from '../articulo/articulo'
+import Venta from '../venta/venta'
 
 export function App() {
   return (
@@ -42,6 +43,9 @@ export function App() {
                   <Route
                     path="/articulo/:mode?/:id?"
                     component={Articulo} />
+                  <Route
+                    path="/venta/:mode?/:id?"
+                    component={Venta} />
                 </Switch>
             </div>
           </div>
