@@ -67,7 +67,7 @@ class Articulo extends GenericComponent {
     } else if (id === "articulo.stockDeseado"){
       dto.stockDeseado = event.target.value;
     } else if (id === "articulo.rubro"){
-      dto.currentRubro = dto.availableRubros.find(r => r.id.toString() === event.target.value)
+      dto.currentRubro = JSON.parse(event.target.value);
     } 
           
     this.setState({dto: dto});

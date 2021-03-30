@@ -81,7 +81,7 @@ class Venta extends GenericComponent {
       this.setState({
         alert: (
         <Alert key="0" variant="success">
-          El artículo se guardo correctamente.
+          La venta se guardo correctamente.
         </Alert>
         ),
         dto: response.result
@@ -89,7 +89,7 @@ class Venta extends GenericComponent {
     } else {
       this.setState({alert: (
         <Alert key="0" variant="danger">
-          El artículo no pudo ser guardado.
+          La venta no pudo ser guardado.
         </Alert>
       )})
     }

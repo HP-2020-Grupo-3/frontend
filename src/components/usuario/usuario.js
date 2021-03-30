@@ -54,7 +54,7 @@ class Usuario extends GenericComponent {
     } else if (id === "usuario.email"){
       dto.email = event.target.value;
     } else if (id === "usuario.role"){
-      dto.currentRole = dto.availableRoles.find(r => r.id.toString() === event.target.value)
+      dto.currentRole = JSON.parse(event.target.value)
     } 
           
     this.setState({dto: dto});
@@ -155,7 +155,6 @@ class Usuario extends GenericComponent {
             <tr>
             <th>#</th>
             <th>Nombre de usuario</th>
-            <th>Password</th>
             <th>Nombre</th>
             <th>Apellido</th>
             <th>E-Mail</th>
@@ -168,7 +167,6 @@ class Usuario extends GenericComponent {
                 <tr>
                 <td>{usuario.id}</td>
                 <td>{usuario.username}</td>
-                <td>{usuario.password}</td>
                 <td>{usuario.nombre}</td>
                 <td>{usuario.apellido}</td>
                 <td>{usuario.email}</td>
@@ -218,7 +216,7 @@ class Usuario extends GenericComponent {
             Password
           </Form.Label>
           <Col sm="10">
-            <Form.Control type="text" id="usuario.password" readOnly={!editable} defaultValue={dto.password} onChange={this.handleChange}/>
+            <Form.Control type="password" id="usuario.password" readOnly={!editable} onChange={this.handleChange}/>
           </Col>
         </Form.Group>
         <Form.Group as={Row} controlId="usuario">
@@ -250,7 +248,7 @@ class Usuario extends GenericComponent {
             Rol
           </Form.Label>
           <Col sm="10">
-            {this.renderComboBoxUsuario("usuario.role", dto.currentRole, dto.availableRoles, editable)}
+            {this.renderComboBox("usuario.role", dto.currentRole, dto.availableRoles, editable, "name")}
           </Col> 
         </Form.Group>
         <Form.Group as={Row} controlId="usuario">
