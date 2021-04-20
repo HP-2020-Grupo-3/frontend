@@ -8,6 +8,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Alert from 'react-bootstrap/Alert';
 import Modal from 'react-bootstrap/Modal';
+import Autosuggest from 'react-autosuggest';
 import { Plus, Dot } from 'react-bootstrap-icons';
 import SecurityContext from '../security/securityContext'
 import VentaAPI from '../venta/ventaAPI';
@@ -22,6 +23,7 @@ class Venta extends GenericComponent {
     this.handleHideModal = this.handleHideModal.bind(this);
     this.handleAddLineaVenta = this.handleAddLineaVenta.bind(this);
     this.handlerRemoveLineaVenta = this.handlerRemoveLineaVenta.bind(this);
+    this.validate = this.validate.bind(this);
   }
 
   async componentDidMount() {
@@ -45,8 +47,8 @@ class Venta extends GenericComponent {
 
     if (id === "venta.numeroComprobante"){
       dto.numeroComprobante = event.target.value;      
-    } else if (id === "venta.isEntregada"){      
-      dto.isEntregada = event.target.value;
+    } else if (id === "venta.entregada"){      
+      dto.entregada = event.target.checked;
     } else if (id === "venta.nota"){
       dto.nota = event.target.value;
     } else if (id === "venta.currentDescuento"){
@@ -63,50 +65,44 @@ class Venta extends GenericComponent {
     
     console.log(dto)
     this.setState({dto: dto});
-
   }
 
   async handleUpsert() {
     const { dto } = this.state;
     dto.usuarioId = SecurityContext.getPrincipal().id;
-    
-    var response;
-    if (dto.id) {
-      response = await this.api.update(dto);
-    } else {
-      response = await this.api.save(dto);
+
+    if (this.validate()) {
+      var response;
+      if (dto.id) {
+        response = await this.api.update(dto);
+      } else {
+        response = await this.api.save(dto);
+      }
+  
+      if (!response.error) {
+        this.showOkAlert("La venta se guardo correctamente.");
+        this.setState({
+          dto: response.result,
+          editable : false
+        })
+      } else {
+        this.showErrorAlert("La venta no pudo ser guardada.");
+      }
     }
 
-    if (! response.error) {
-      this.setState({
-        alert: (
-        <Alert key="0" variant="success">
-          La venta se guardo correctamente.
-        </Alert>
-        ),
-        dto: response.result
-      })
-    } else {
-      this.setState({alert: (
-        <Alert key="0" variant="danger">
-          La venta no pudo ser guardado.
-        </Alert>
-      )})
-    }
+    this.handleHideModal();
 
   }
 
   handleShowModal(event) {
     this.setState({
-      showModal: true,
-      idToDelete: (event.target.id).split(".")[2]
+      showModal: true
     })
   }  
   
   handleHideModal() {
     this.setState({
-      showModal: false,
-      idToDelete: null
+      showModal: false
     })
   }  
 
@@ -152,6 +148,19 @@ class Venta extends GenericComponent {
     })
   }  
 
+  validate() {
+    const { dto } = this.state;
+
+    console.log(dto.lineaVentaDtos.length)
+    if (dto.lineaVentaDtos.length === 0) {
+      this.showErrorAlert("Agregue al menos un objeto.");
+      return false
+    }
+
+    return true
+
+  }
+
   renderList() {
     const { dto, alert, showModal } = this.state;
     return (
@@ -172,23 +181,22 @@ class Venta extends GenericComponent {
         <Table striped bordered hover>
         <thead>
             <tr>
-            <th>#</th>
+            <th>Nro. Comp</th>
             <th>Fecha</th>
+            <th>Total</th>
+            <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            {dto.map((venta) =>
+            {dto.sort((a, b) => b.id - a.id).map((venta) =>
                 <tr>
-                <td>{venta.id}</td>
-                <td>{venta.fecha}</td>
+                <td>{this.formatComprobante(venta.numeroComprobante)}</td>
+                <td>{this.formatDate(venta.fecha)}</td>
+                <td>{this.formatCurrency(venta.total)}</td>
                 <td>
                 <ButtonGroup>
                   <Button 
                     variant="primary" href={"/venta/view/" + venta.id} >Ver</Button>
-                  <Button 
-                    variant="primary" href={"/venta/edit/" + venta.id} >Editar</Button>
-                  <Button 
-                    id={"delete.venta." + venta.id} variant="danger" onClick={this.handleShowModal} >Eliminar</Button>
                 </ButtonGroup>
                 </td>
                 </tr>
@@ -201,7 +209,7 @@ class Venta extends GenericComponent {
 
  
   renderSingle() {
-    const { dto, editable, alert } = this.state;
+    const { dto, editable, alert} = this.state;
     if (!dto.selectedCantidad) {
       dto.selectedCantidad = 1
       this.setState({dto: dto})
@@ -210,40 +218,28 @@ class Venta extends GenericComponent {
     const subtotal = dto.lineaVentaDtos.reduce((acc, linea) => acc += linea.precio * linea.cantidad, 0 );
     
     return (
+      <>
+      {this.renderModalDialog(
+        "Confirmacion",
+        "Esta seguro de que desea confirmar la compra?",
+        this.handleHideModal, this.handleUpsert,
+        "Cancelar", "Confirmar")}
+
       <Form>
         {alert}
-        <Form.Group as={Row} controlId="venta">
-          <Form.Label column sm="2">
-            Id
+        <Form.Group as={Row} controlId="venta" hidden={editable}>
+        <Form.Label column sm="3">
+            Nro Comprobante
           </Form.Label>
-          <Col sm="3">
-            <Form.Control type="text" readOnly defaultValue={dto.id} />
-          </Col>
+          <Form.Label column sm="3">
+            {this.formatComprobante(dto.numeroComprobante)}
+          </Form.Label>
           <Form.Label column sm="2">
             Fecha
           </Form.Label>
-          <Col sm="5">
-            <Form.Control type="date" id="venta.fecha" readOnly value={dto.fecha}/>
-          </Col>
-        </Form.Group>
-        <Form.Group as={Row} controlId="venta">
-          <Form.Label column sm="3">
-            Nro Comprobante
+          <Form.Label column sm="4">
+            {this.formatDate(dto.fecha)}
           </Form.Label>
-          <Col sm="6">
-            <Form.Control type="number" id="venta.numeroComprobante" readOnly defaultValue={dto.numeroComprobante} onChange={this.handleChange}/>
-          </Col>
-          <Form.Label column sm="3">
-            <Form.Check type="checkbox" id="venta.isEntregada" label="Entregada" readOnly={!editable} value={dto.isEntregada} onChange={this.handleChange}/>
-          </Form.Label>
-        </Form.Group>
-        <Form.Group as={Row} controlId="venta">
-        <Form.Label column sm="3">
-            Notas
-          </Form.Label>
-          <Col sm="9">
-            <Form.Control type="textarea" id="venta.nota" rows={3} readOnly={!editable} defaultValue={dto.nota} onChange={this.handleChange}/>
-          </Col>
         </Form.Group>
 
         <Form.Group as={Row} controlId="venta">
@@ -259,10 +255,24 @@ class Venta extends GenericComponent {
           <Col sm="4">
             {this.renderComboBox("venta.currentTipoEntrega", dto.currentTipoEntrega, dto.availableTipoEntrega, editable)}
           </Col> 
+          <Col sm="9"></Col>
+          <Form.Label column sm="3">
+            <Form.Check type="switch" id="venta.entregada" label="Entregada" 
+              disabled={!editable} checked={dto.entregada} onChange={this.handleChange} />
+          </Form.Label>
         </Form.Group>
         <Form.Group as={Row} controlId="venta">
+        </Form.Group>
+        <Form.Group as={Row} controlId="venta">
+          <Form.Label column sm="2">
+            Notas
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control as="textarea" id="venta.nota" rows={3} readOnly={!editable} defaultValue={dto.nota} onChange={this.handleChange}/>
+          </Col>
+        </Form.Group>
 
-        </Form.Group> <hr />
+        <hr />
 
         <Form.Group as={Row} controlId="venta">
           <Form.Label column center sm="12">
@@ -285,7 +295,7 @@ class Venta extends GenericComponent {
             x
           </Form.Label>
           <Col sm="2">
-            <Form.Control type="number" id="venta.lineaVenta.cantidad" readOnly={!editable} defaultValue={1} onChange={this.handleChange}/>
+            <Form.Control type="number" id="venta.lineaVenta.cantidad" readOnly={!editable} defaultValue={1} min={1} onChange={this.handleChange}/>
           </Col>
           <Col sm="2">
             <Form.Control plaintext readOnly 
@@ -306,7 +316,7 @@ class Venta extends GenericComponent {
             <th>P. Unitario</th>
             <th>Cantidad</th>
             <th>Subtotal</th>
-            <th></th>
+            <th hidden={!editable}></th>
             </tr>
         </thead>
         <tbody align-middle >
@@ -316,7 +326,7 @@ class Venta extends GenericComponent {
                 <td>{this.formatCurrency(linea.precio)}</td>
                 <td>{(linea.cantidad)}</td>
                 <td>{this.formatCurrency(linea.precio * linea.cantidad)}</td>
-                <td>
+                <td hidden={!editable}>
                  <Button 
                     id={"delete.linea." + linea.articuloId} variant="link" size="sm" onClick={this.handlerRemoveLineaVenta} >Quitar</Button>
                 </td>
@@ -358,16 +368,17 @@ class Venta extends GenericComponent {
         <Form.Group as={Row} controlId="venta">
           <Col sm="6">
             <Button variant="primary" href="/venta/">
-              Volver
+              {editable ? "Cancelar" : "Volver"}
             </Button>
           </Col>
           <Col sm="6">
-            <Button variant="success" hidden={!editable} onClick={this.handleUpsert}>
-              Guardar
+            <Button variant="success" hidden={!editable} onClick={this.handleShowModal}>
+              Confirmar
             </Button>
           </Col>
         </Form.Group>
       </Form>
+      </>
 
     );
   }
