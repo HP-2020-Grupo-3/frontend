@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import GenericComponent from "../common/genericComponent";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
@@ -12,6 +13,7 @@ import Autosuggest from 'react-autosuggest';
 import { Plus, Dot } from 'react-bootstrap-icons';
 import SecurityContext from '../security/securityContext'
 import VentaAPI from '../venta/ventaAPI';
+import PredictiveComboBoxArticulo from '../ui/predictiveComboBoxArticulo';
 
 class Venta extends GenericComponent {
   constructor(props) {
@@ -44,7 +46,7 @@ class Venta extends GenericComponent {
   handleChange(event) {
     const dto = this.state.dto;
     const id = event.target.id;
-
+    
     if (id === "venta.numeroComprobante"){
       dto.numeroComprobante = event.target.value;      
     } else if (id === "venta.entregada"){      
@@ -63,8 +65,10 @@ class Venta extends GenericComponent {
       dto.selectedCantidad = parseInt(event.target.value);
     } 
     
+    console.log("dto")
     console.log(dto)
     this.setState({dto: dto});
+
   }
 
   async handleUpsert() {
@@ -123,7 +127,7 @@ class Venta extends GenericComponent {
     dto.addedArticuloDto.push(dto.selectedArticulo);
     dto.availableArticuloDto = dto.availableArticuloDto.filter((articulo) => articulo.id != dto.selectedArticulo.id);
     dto.selectedArticulo = null;
-    dto.selectedCantidad = null;
+    dto.selectedCantidad = 1;
 
     this.setState({
       dto: dto
@@ -221,7 +225,7 @@ class Venta extends GenericComponent {
       <>
       {this.renderModalDialog(
         "Confirmacion",
-        "Esta seguro de que desea confirmar la compra?",
+        "Esta seguro de que desea confirmar la venta?",
         this.handleHideModal, this.handleUpsert,
         "Cancelar", "Confirmar")}
 
@@ -285,7 +289,11 @@ class Venta extends GenericComponent {
             Articulo
           </Form.Label>
           <Col sm="3">
-            {this.renderComboBox("venta.lineaVenta.articulo", dto.availableArticuloDto, dto.availableArticuloDto, editable)}
+           <PredictiveComboBoxArticulo
+            id="venta.lineaVenta.articulo"
+            value={dto.selectedArticulo}
+            availableItems={dto.availableArticuloDto}
+            onChange={this.handleChange} />
           </Col> 
           <Col sm="2">
             <Form.Control plaintext readOnly 
@@ -295,7 +303,7 @@ class Venta extends GenericComponent {
             x
           </Form.Label>
           <Col sm="2">
-            <Form.Control type="number" id="venta.lineaVenta.cantidad" readOnly={!editable} defaultValue={1} min={1} onChange={this.handleChange}/>
+            <Form.Control type="number" id="venta.lineaVenta.cantidad" readOnly={!editable} defaultValue={1} value={dto.selectedCantidad} min={1} onChange={this.handleChange}/>
           </Col>
           <Col sm="2">
             <Form.Control plaintext readOnly 

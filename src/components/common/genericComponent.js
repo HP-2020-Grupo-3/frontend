@@ -3,6 +3,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Alert from 'react-bootstrap/Alert';
+import Autosuggest from 'react-autosuggest';
 import { Trash, Pencil, ZoomIn } from 'react-bootstrap-icons';
 
 
@@ -60,6 +61,7 @@ class GenericComponent extends React.Component {
   // UI Functions
 
   renderComboBox(id, currentItem, availableItems, editable, displayProperty = "nombre") {
+
     return (
     <Form.Control as="Select" type="text" 
       id={id}
