@@ -88,16 +88,16 @@ class GenericComponent extends React.Component {
     )
   }
 
-  renderModalDialog(title, body, handleCancel, handleOk, cancelText = "Cancelar", okText = "Aceptar") {
+  renderModalDialog(title, body, handleCancel, handleOk, cancelText = "Cancelar", okText = "Aceptar", showVariable = "showModal", variant = "secondary") {
     return (
-      <Modal show={this.state.showModal} onHide={handleCancel} >
+      <Modal show={this.state[showVariable]} onHide={handleCancel} >
         <Modal.Title>{title}</Modal.Title>
         <Modal.Body><p>{body}</p></Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCancel} >
             {cancelText}
           </Button>
-          <Button variant="danger" onClick={handleOk}>
+          <Button variant={variant} onClick={handleOk}>
             {okText}
           </Button>
         </Modal.Footer>
@@ -138,7 +138,11 @@ class GenericComponent extends React.Component {
   // Format Functions
 
   formatCurrency(number) {
-    return "$ " + number.toFixed(2);
+    if (!number) {
+      return "$";
+    } else {
+      return "$ " + number.toFixed(2);
+    }
   }
 
   formatDate(dateString) {

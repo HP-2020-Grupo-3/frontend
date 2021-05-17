@@ -9,10 +9,10 @@ import Menu from '../navbar/menu'
 import Rubro from '../rubro/rubro'
 import Shop from '../shop/shop'
 import Login from '../security/login';
-
 import Usuario from '../usuario/usuario'
 import Articulo from '../articulo/articulo'
 import Venta from '../venta/venta'
+import CuentaCorrienteCliente from '../cuentaCorrienteCliente/cuentaCorrienteCliente'
 
 export function App() {
   return (
@@ -46,6 +46,9 @@ export function App() {
                   <Route
                     path="/venta/:mode?/:id?"
                     component={Venta} />
+                  <Route
+                    path="/cuentaCorrienteCliente/:mode?/:id?"
+                    component={CuentaCorrienteCliente} />
                 </Switch>
             </div>
           </div>
