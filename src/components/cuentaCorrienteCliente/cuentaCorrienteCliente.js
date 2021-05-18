@@ -168,7 +168,7 @@ class CuentaCorrienteCliente extends GenericComponent {
       renderList() {
         const { dto, alert, showModal } = this.state;
         var showAprobacion = false;
-        if (dto && dto[0].cantidadAprobacion > 0) {
+        if (dto && dto.cantidadAprobacion > 0) {
           showAprobacion = true;
         }
         return (
@@ -201,7 +201,7 @@ class CuentaCorrienteCliente extends GenericComponent {
                 </tr>
             </thead>
             <tbody>
-                {dto.map((cuentaCorrienteCliente) =>
+                {dto.cuentaCorrienteClienteDtos.map((cuentaCorrienteCliente) =>
                     <tr>
                     <td>{cuentaCorrienteCliente.id}</td>
                     <td>{cuentaCorrienteCliente.username}</td>
