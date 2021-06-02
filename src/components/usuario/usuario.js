@@ -253,7 +253,7 @@ class Usuario extends GenericComponent {
         </Form.Group>
         <Form.Group as={Row} controlId="usuario">
           <Col sm="6">
-            <Button variant="primary" href="/usuario/">
+            <Button variant="primary" onClick={this.props.history.goBack}>
               Volver
             </Button>
           </Col>

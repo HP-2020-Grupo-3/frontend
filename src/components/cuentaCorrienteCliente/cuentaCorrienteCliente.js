@@ -22,30 +22,37 @@ class CuentaCorrienteCliente extends GenericComponent {
       this.handleHideModal = this.handleHideModal.bind(this);
       this.handleShowApproveModal = this.handleShowApproveModal.bind(this);
       this.handleHideApproveModal = this.handleHideApproveModal.bind(this);
+      this.handleShowCreateModal = this.handleShowCreateModal.bind(this);
+      this.handleHideCreateModal = this.handleHideCreateModal.bind(this);
       this.handleApprove = this.handleApprove.bind(this);
+      this.handleCreate = this.handleCreate.bind(this);
       
       this.setState({
+        userRole: null,
         ccToApprove: null,
+        usuarioToCreateCC: null,
         showApproveModal: false,
+        showCreateModal: null,
         idToDelete: null
       });
     }
 
     async componentDidMount() {
+      this.setState({ userRole: SecurityContext.getPrincipal().role });
 
-        if (!this.props.match.params.mode) {
-          this.findAll();
-        } else if (this.props.match.params.mode === "view" | this.props.match.params.mode === "edit") {
-          // TODO: Validar que exista el id if (!this.props.match.params.id) then mostrar algun error
-          this.findById(this.props.match.params.id);
-          this.setState({ "editable" : this.props.match.params.mode === "edit" });
-        } else if (this.props.match.params.mode === "new") {
-          this.getBaseDto();
-          this.setState({ "editable" : true });
-        } else if (this.props.match.params.mode === "aprobacion") {
+      if (!this.props.match.params.mode) {
+        this.findAll();
+      } else if (this.props.match.params.mode === "view" | this.props.match.params.mode === "edit") {
+        // TODO: Validar que exista el id if (!this.props.match.params.id) then mostrar algun error
+        this.findById(this.props.match.params.id);
+        this.setState({ "editable" : this.props.match.params.mode === "edit" });
+      } else if (this.props.match.params.mode === "new") {
+        this.createCuentaCorriente();
+        this.setState({ "editable" : true,  currentView: 'new' });
+      } else if (this.props.match.params.mode === "aprobacion" ) {
           this.findAllNotAprobada();
-        }
       }
+    }
 
       handleChange(event) {
         const dto = this.state.dto;
@@ -86,7 +93,6 @@ class CuentaCorrienteCliente extends GenericComponent {
 
       async handleDelete() {
         const { idToDelete, currentView } = this.state;
-        console.log("delete " + idToDelete);
         var response = await this.api.delete(idToDelete);
         
         if (! response.error && currentView === "aprobacion") {
@@ -127,17 +133,30 @@ class CuentaCorrienteCliente extends GenericComponent {
       }  
 
       handleShowApproveModal(cc) {
-        console.log("SHOW APPROVE MODAL", cc);
         this.setState({
           showApproveModal: true,
           ccToApprove: cc
         })
-      }  
+      } 
+      
+      handleShowCreateModal(usuario) {
+        this.setState({
+          showCreateModal: true,
+          usuarioToCreateCC: usuario
+        })
+      }
       
       handleHideApproveModal() {
         this.setState({
           showApproveModal: false,
           ccToApprove: null
+        })
+      }
+      
+      handleHideCreateModal() {
+        this.setState({
+          showCreateModal: false,
+          usuarioToApprove: null
         })
       }  
       
@@ -146,12 +165,25 @@ class CuentaCorrienteCliente extends GenericComponent {
         ccToApprove.isAprobada = true;
         var response = await this.api.update(ccToApprove);
         this.handleHideApproveModal();
-        //console.log(response);
         if (! response.error) {
           this.showOkAlert("Se aprobó la cuenta corriente") 
           this.findAllNotAprobada();
         } else {
           this.showErrorAlert("No se pudo aprobar la cuenta corriente")
+        }
+      }
+
+      async handleCreate() {
+        const { dto,  usuarioToCreateCC } = this.state;
+
+        dto.usuarioId = usuarioToCreateCC.id;
+        var response = await this.api.save(dto);
+        this.handleHideCreateModal();
+        if (! response.error) {
+          this.showOkAlert("Se creó la cuenta corriente y debe ser aprobada por un administrador") 
+          this.createCuentaCorriente();
+        } else {
+          this.showErrorAlert("No se pudo crear la cuenta corriente")
         }
       }
 
@@ -165,10 +197,21 @@ class CuentaCorrienteCliente extends GenericComponent {
         } 
       }
 
+      async createCuentaCorriente() {
+        const response = await this.api.getBaseDto();
+        if (!response.error) {
+          this.setState({ error: false, isLoaded: true, currentView: 'new', dto: response.result});
+        } else {
+          this.errorHandler(response.result);
+          this.setState({ error: true, isLoaded: true, currentView: 'new', dto: response.result });
+        }
+      }
+
       renderList() {
         const { dto, alert, showModal } = this.state;
         var showAprobacion = false;
-        if (dto && dto.cantidadAprobacion > 0) {
+
+        if (this.state.userRole === 'ROLE_ADMIN' & dto.cantidadAprobacion > 0) {
           showAprobacion = true;
         }
         return (
@@ -294,7 +337,66 @@ class CuentaCorrienteCliente extends GenericComponent {
           </>
         );
       }
-     
+      
+      renderAlta(){
+        const { dto, alert} = this.state;
+
+        return (
+          <>          
+          {this.renderModalDialog(
+            "¿Está seguro que desea crear una Cuenta Corriente para este usuario?", 
+            "", 
+            this.handleHideCreateModal, 
+            this.handleCreate, 
+            "Cancelar", 
+            "Crear", 
+            "showCreateModal",
+            "success"
+          )}
+          <h1>Alta de Cuenta Corriente</h1>
+          <br></br>
+          <h3>Seleccione el usuario</h3>
+          {alert}
+            <Table striped bordered hover>
+            <thead>
+                <tr>
+                <th>#</th>
+                <th>Username</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>E-mail</th>
+                <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {dto.usuarioCCDtos.map((usuario) =>
+                    <tr>
+                    <td>{usuario.id}</td>
+                    <td>{usuario.username}</td>
+                    <td>{usuario.nombre}</td>
+                    <td>{usuario.apellido}</td>           
+                    <td>{usuario.email}</td>
+                    <td>
+                      <ButtonGroup>
+                        <Button 
+                          variant="success" onClick={this.handleShowCreateModal.bind(this, usuario)}><CheckSquare size={20}/></Button>
+                        <Button 
+                          variant="primary" href={"/usuario/view/" + usuario.id} ><ZoomIn size={20}/></Button>
+                      </ButtonGroup>
+                    </td>
+                    </tr>
+                )}
+            </tbody>
+            </Table>
+            <Form.Group as={Row} controlId="rubro">
+              <Col sm="6">
+                <Button variant="primary" href={"/cuentaCorrienteCliente/"} >Volver</Button>
+              </Col>
+            </Form.Group>
+          </>
+        );
+      }
+
       renderSingle() {
         const { dto, editable, alert } = this.state;
         
@@ -335,7 +437,7 @@ class CuentaCorrienteCliente extends GenericComponent {
             </Form.Group>
             <Form.Group as={Row} controlId="cuentaCorrienteCliente">
               <Col sm="6">
-                <Button variant="primary" onClick={() => this.props.history.goBack()}>
+                <Button variant="primary" onClick={this.props.history.goBack}>
                   Volver
                 </Button>
               </Col>
@@ -350,9 +452,9 @@ class CuentaCorrienteCliente extends GenericComponent {
       }
     
       render() {
-        const { error, isLoaded, currentView, dto} = this.state;
+        const { error, isLoaded, currentView, dto, userRole} = this.state;
+        
         if (error) {
-          console.log(dto);
           return <div>Error: {dto.message}</div>;
         } else if (!isLoaded) {
           return <div>Loading...</div>;
@@ -364,6 +466,8 @@ class CuentaCorrienteCliente extends GenericComponent {
               return this.renderSingle();
             case 'aprobacion':
               return this.renderAprobacion();
+            case 'new':
+              return this.renderAlta();
             default:
               return this.renderList();
           }
