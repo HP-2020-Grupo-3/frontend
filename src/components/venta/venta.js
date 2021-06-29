@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import GenericComponent from "../common/genericComponent";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
@@ -14,6 +13,8 @@ import { Plus, Dot } from 'react-bootstrap-icons';
 import SecurityContext from '../security/securityContext'
 import VentaAPI from '../venta/ventaAPI';
 import PredictiveComboBoxArticulo from '../ui/predictiveComboBoxArticulo';
+import PortalWindow from '../ui/portalWindow';
+import ComprobantePagoImprimible from '../ui/comprobantePagoImprimible';
 
 class Venta extends GenericComponent {
   constructor(props) {
@@ -26,6 +27,13 @@ class Venta extends GenericComponent {
     this.handleAddLineaVenta = this.handleAddLineaVenta.bind(this);
     this.handlerRemoveLineaVenta = this.handlerRemoveLineaVenta.bind(this);
     this.validate = this.validate.bind(this);
+    this.handlerPrintComprobante = this.handlerPrintComprobante.bind(this);
+    this.toggleWindowPortal = this.toggleWindowPortal.bind(this);
+    this.closeWindowPortal = this.closeWindowPortal.bind(this);
+
+    this.state = {
+      showWindowPortal: false
+    };
   }
 
   async componentDidMount() {
@@ -165,10 +173,34 @@ class Venta extends GenericComponent {
 
   }
 
+  handlerPrintComprobante(idVenta) {
+    console.log("HANDLER COMPROBANTE", idVenta);
+    
+     
+  }
+
+  toggleWindowPortal(venta) {
+    this.setState(state => ({
+      ...state,
+      showWindowPortal: true,
+      venta: venta,
+    }));
+  }
+  
+  closeWindowPortal() {
+    this.setState({ showWindowPortal: false })
+  }
+
   renderList() {
     const { dto, alert, showModal } = this.state;
     return (
-      <>
+      <>          
+        {this.state.showWindowPortal && (
+          <PortalWindow closeWindowPortal={this.closeWindowPortal} >
+            <ComprobantePagoImprimible closeWindowPortal={this.closeWindowPortal} venta={this.state.venta}/>
+          </PortalWindow>
+        )}
+
         <Modal show={showModal} onHide={this.handleHideModal} >
           <Modal.Footer>
             <Modal.Title>Esta seguro de que desea eliminar este Venta?</Modal.Title>
@@ -185,7 +217,7 @@ class Venta extends GenericComponent {
         <Table striped bordered hover>
         <thead>
             <tr>
-            <th>Nro. Comp</th>
+            <th>Venta Nro.</th>
             <th>Fecha</th>
             <th>Total</th>
             <th>Acciones</th>
@@ -201,6 +233,9 @@ class Venta extends GenericComponent {
                 <ButtonGroup>
                   <Button 
                     variant="primary" href={"/venta/view/" + venta.id} >Ver</Button>
+                  <Col sm="12">
+                  <Button 
+                    variant="primary" onClick={this.toggleWindowPortal.bind(this, venta)} >Imprimir Comprobante</Button></Col>
                 </ButtonGroup>
                 </td>
                 </tr>
@@ -233,7 +268,7 @@ class Venta extends GenericComponent {
         {alert}
         <Form.Group as={Row} controlId="venta" hidden={editable}>
         <Form.Label column sm="3">
-            Nro Comprobante
+            Venta Nro.
           </Form.Label>
           <Form.Label column sm="3">
             {this.formatComprobante(dto.numeroComprobante)}

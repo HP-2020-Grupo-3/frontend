@@ -58,6 +58,10 @@ class GenericComponent extends React.Component {
     }
   }
 
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   // UI Functions
 
   renderComboBox(id, currentItem, availableItems, editable, displayProperty = "nombre") {
