@@ -9,7 +9,7 @@ class PredictiveComboBox extends React.Component {
     this.onSuggestionSelected = this.onSuggestionSelected.bind(this);
 
     this.state = {
-      value: props.value,
+      value: props.value ? props.value : '',
       suggestions: [],
       selectionHappend: false
     };

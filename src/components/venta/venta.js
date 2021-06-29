@@ -14,6 +14,8 @@ import { Plus, Dot } from 'react-bootstrap-icons';
 import SecurityContext from '../security/securityContext'
 import VentaAPI from '../venta/ventaAPI';
 import PredictiveComboBoxArticulo from '../ui/predictiveComboBoxArticulo';
+import PredictiveComboBox from '../ui/predictiveComboBox';
+import PredictiveComboBoxCuentaCorriente from '../ui/predictiveComboBoxCuentaCorriente';
 
 class Venta extends GenericComponent {
   constructor(props) {
@@ -63,7 +65,11 @@ class Venta extends GenericComponent {
       dto.selectedArticulo = JSON.parse(event.target.value);
     } else if (id === "venta.lineaVenta.cantidad"){
       dto.selectedCantidad = parseInt(event.target.value);
-    } 
+    } else if (id === "venta.cuentaCorriente"){
+      dto.selectedCuentaCorrienteClienteVentaDto = JSON.parse(event.target.value);
+    } else if (id === "venta.precioCongelado"){      
+      dto.precioCongelado = event.target.checked;
+    }
     
     console.log("dto")
     console.log(dto)
@@ -150,7 +156,19 @@ class Venta extends GenericComponent {
     this.setState({
       dto: dto
     })
-  }  
+  }
+
+  renderSelectedCuentaCorrienteClienteVentaDto() {
+    const { dto } = this.state;
+
+    return(
+      <div class='text-center font-italic'>
+        {dto.selectedCuentaCorrienteClienteVentaDto.nombre} {dto.selectedCuentaCorrienteClienteVentaDto.apellido}
+        <small> ({dto.selectedCuentaCorrienteClienteVentaDto.username}) </small>
+        <small class='font-italic'>{this.formatCurrency(dto.selectedCuentaCorrienteClienteVentaDto.total)}</small>
+      </div>
+    )
+  }
 
   validate() {
     const { dto } = this.state;
@@ -196,7 +214,10 @@ class Venta extends GenericComponent {
                 <tr>
                 <td>{this.formatComprobante(venta.numeroComprobante)}</td>
                 <td>{this.formatDate(venta.fecha)}</td>
-                <td>{this.formatCurrency(venta.total)}</td>
+                <td>{ venta.total === null ?
+                  '' : this.formatCurrency(venta.total)}
+                  <small> { !(venta.medioPago.id === 5) || 'CC' }</small>
+                </td>
                 <td>
                 <ButtonGroup>
                   <Button 
@@ -265,8 +286,33 @@ class Venta extends GenericComponent {
               disabled={!editable} checked={dto.entregada} onChange={this.handleChange} />
           </Form.Label>
         </Form.Group>
-        <Form.Group as={Row} controlId="venta">
-        </Form.Group>
+
+        { dto.currentMedioPago.id === 5 ?
+          <Form.Group as={Row} controlId="venta">
+            <Form.Label column sm="3">
+            { editable ? 'Cuenta Corriente' : '' }
+            </Form.Label>
+              <Col sm="3">
+                  { editable ? 
+                    <PredictiveComboBoxCuentaCorriente
+                    id="venta.cuentaCorriente"
+                    value={dto.selectedCuentaCorrienteClienteVentaDto}
+                    availableItems={dto.cuentaCorrienteClienteVentaDtos}
+                    onChange={this.handleChange} /> : ''
+                  } 
+              </Col> 
+              <Form.Label column sm="6" style={{whiteSpace: 'nowrap'}}>
+                {dto.selectedCuentaCorrienteClienteVentaDto ? this.renderSelectedCuentaCorrienteClienteVentaDto() : '' }
+              </Form.Label>
+              <Col sm="8"></Col>
+              <Form.Label column sm="4">
+                <Form.Check type="switch" id="venta.precioCongelado" label="Congelar Precio" 
+                  disabled={!editable} checked={dto.precioCongelado} onChange={this.handleChange} />
+              </Form.Label>
+          </Form.Group>
+        : ''}
+
+
         <Form.Group as={Row} controlId="venta">
           <Form.Label column sm="2">
             Notas

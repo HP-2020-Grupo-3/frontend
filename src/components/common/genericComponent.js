@@ -139,10 +139,10 @@ class GenericComponent extends React.Component {
 
   formatCurrency(number) {
     if (!number) {
-      return "$";
-    } else {
-      return "$ " + number.toFixed(2);
+      number = 0
     }
+    
+    return "$ " + number.toFixed(2);
   }
 
   formatDate(dateString) {
