@@ -28,9 +28,11 @@ class Menu extends React.Component {
               <ul>
                 <li><a href="/venta/">Ventas</a></li>
                 <li><a href="/cuentaCorrienteCliente/">Cuentas Corrientes</a></li>
+                <li><a href="/comprobantePago/">Comprobantes de Pago</a></li>
                 <li><a href="/rubro/">Rubros</a></li>
                 <li><a href="/usuario/">Usuarios</a></li>
                 <li><a href="/articulo/">Artículos</a></li>
+                <li><a href="/descuento/">Descuentos</a></li>
               </ul>
             </div>
           </div>

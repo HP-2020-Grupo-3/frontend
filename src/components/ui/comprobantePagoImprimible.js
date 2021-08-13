@@ -22,8 +22,8 @@ class ComprobantePagoImprimible extends GenericComponent {
 
     render() {
       console.log("VENTA ", this.props.venta);
-      const subtotal = this.props.venta.lineasVenta.reduce((acc, linea) => acc += linea.precio.valor * linea.cantidad, 0 );
-
+      const subtotal = this.props.venta.lineaVentaDtos.reduce((acc, linea) => acc += linea.precio * linea.cantidad, 0 );
+      const total = subtotal - (subtotal * this.props.venta.currentDescuento.valor);
       return (
         <Form>
           <Col sm="1"/>
@@ -67,12 +67,12 @@ class ComprobantePagoImprimible extends GenericComponent {
                 </tr>
               </thead>
               <tbody align-middle >
-                {this.props.venta.lineasVenta.map((linea) =>
+                {this.props.venta.lineaVentaDtos.map((linea) =>
                   <tr>
-                  <td>{linea.articulo.nombre}</td>
-                  <td>{linea.precio.valor.toFixed(2)}</td>
+                  <td>{linea.articuloNombre}</td>
+                  <td>{linea.precio.toFixed(2)}</td>
                   <td>{linea.cantidad}</td>
-                  <td>{(linea.precio.valor * linea.cantidad).toFixed(2)}</td>
+                  <td>{(linea.precio * linea.cantidad).toFixed(2)}</td>
                   </tr>
                 )}
               </tbody>
@@ -96,7 +96,7 @@ class ComprobantePagoImprimible extends GenericComponent {
               </Form.Label>
               <Col sm="2">
                 <Form.Label plaintext >
-                  {this.props.venta.descuento.valor.toFixed(2)}%
+                  {this.props.venta.currentDescuento.displayText}
                 </Form.Label>              
               </Col>
             </Form.Group>
@@ -107,7 +107,7 @@ class ComprobantePagoImprimible extends GenericComponent {
               </Form.Label>
               <Col sm="2">
                 <Form.Label plaintext >
-                  {this.props.venta.total.toFixed(2)}
+                  {total.toFixed(2)}
                 </Form.Label>              
               </Col>
             </Form.Group>

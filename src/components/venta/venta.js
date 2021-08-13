@@ -196,11 +196,13 @@ class Venta extends GenericComponent {
      
   }
 
-  toggleWindowPortal(venta) {
+  async toggleWindowPortal(idVenta) {
+    const venta = await this.api.findById(idVenta)
+
     this.setState(state => ({
       ...state,
       showWindowPortal: true,
-      venta: venta,
+      venta: venta.result,
     }));
   }
   
@@ -253,9 +255,8 @@ class Venta extends GenericComponent {
                 <ButtonGroup>
                   <Button 
                     variant="primary" href={"/venta/view/" + venta.id} >Ver</Button>
-                  <Col sm="12">
                   <Button 
-                    variant="primary" onClick={this.toggleWindowPortal.bind(this, venta)} >Imprimir Comprobante</Button></Col>
+                    variant="primary" disabled={(venta.medioPago.id === 5)} onClick={this.toggleWindowPortal.bind(this, venta.id)} >Imprimir Comprobante</Button>
                 </ButtonGroup>
                 </td>
                 </tr>
@@ -455,7 +456,7 @@ class Venta extends GenericComponent {
 
         <Form.Group as={Row} controlId="venta">
           <Col sm="6">
-            <Button variant="primary" href="/venta/">
+            <Button variant="primary" onClick={this.props.history.goBack}>
               {editable ? "Cancelar" : "Volver"}
             </Button>
           </Col>
