@@ -11,8 +11,10 @@ import Shop from '../shop/shop'
 import Login from '../security/login';
 import Usuario from '../usuario/usuario'
 import Articulo from '../articulo/articulo'
-import Venta from '../venta/venta'
-import CuentaCorrienteCliente from '../cuentaCorrienteCliente/cuentaCorrienteCliente'
+import Venta from '../venta/venta';
+import CuentaCorrienteCliente from '../cuentaCorrienteCliente/cuentaCorrienteCliente';
+import ComprobantePago from '../comprobantePago/comprobantePago';
+import Descuento from '../descuento/descuento';
 
 export function App() {
   return (
@@ -49,6 +51,12 @@ export function App() {
                   <Route
                     path="/cuentaCorrienteCliente/:mode?/:id?"
                     component={CuentaCorrienteCliente} />
+                  <Route
+                    path="/comprobantePago/:mode?/:id?"
+                    component={ComprobantePago} />
+                  <Route
+                    path="/descuento/:mode?/:id?"
+                    component={Descuento} />
                 </Switch>
             </div>
           </div>
