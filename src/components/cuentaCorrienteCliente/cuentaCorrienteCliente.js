@@ -7,7 +7,7 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Alert from 'react-bootstrap/Alert';
-import { Plus, Trash, Pencil, ZoomIn, CheckSquare } from 'react-bootstrap-icons';
+import { Plus, Trash, Pencil, ZoomIn, CheckSquare, CashStack} from 'react-bootstrap-icons';
 import SecurityContext from '../security/securityContext'
 import CuentaCorrienteClienteAPI from '../cuentaCorrienteCliente/cuentaCorrienteClienteAPI';
 
@@ -26,6 +26,7 @@ class CuentaCorrienteCliente extends GenericComponent {
       this.handleHideCreateModal = this.handleHideCreateModal.bind(this);
       this.handleApprove = this.handleApprove.bind(this);
       this.handleCreate = this.handleCreate.bind(this);
+      this.handlePago = this.handlePago.bind(this);
       
       this.setState({
         userRole: null,
@@ -39,7 +40,8 @@ class CuentaCorrienteCliente extends GenericComponent {
 
     async componentDidMount() {
       this.setState({ userRole: SecurityContext.getPrincipal().role });
-
+      
+      console.log(this.props.match.params.mode)
       if (!this.props.match.params.mode) {
         this.findAll();
       } else if (this.props.match.params.mode === "view" | this.props.match.params.mode === "edit") {
@@ -50,12 +52,22 @@ class CuentaCorrienteCliente extends GenericComponent {
         this.createCuentaCorriente();
         this.setState({ "editable" : true,  currentView: 'new' });
       } else if (this.props.match.params.mode === "aprobacion" ) {
-          this.findAllNotAprobada();
+        this.findAllNotAprobada();
+      } else if (this.props.match.params.mode === "pago" ) {
+        const response = await this.api.findById(this.props.match.params.id);
+        
+        if (!response.error) {
+          this.setState({ error: false, isLoaded: true, currentView: 'pago', dto: response.result});
+        } else {
+          this.errorHandler(response.result);
+          this.setState({ error: true, isLoaded: true, currentView: 'pago', dto: response.result });
+        }
       }
     }
 
       handleChange(event) {
         const dto = this.state.dto;
+        const total = this.state.total;
         const id = event.target.id;
     
         if (id === "cuentaCorrienteCliente.username"){
@@ -64,6 +76,23 @@ class CuentaCorrienteCliente extends GenericComponent {
           dto.nombre = event.target.value;
         } else if (id === "cuentaCorrienteCliente.apellido"){
           dto.apellido = event.target.value;
+        } else if (id.includes("estado.cantidad")){
+          dto.estadoCuentaCorrienteDtos
+            .filter(estado => estado.id == id.split(".")[2])
+            .map(estado => {
+              estado.cantidadAPagar = event.target.value;
+
+              return estado
+            });
+          } else if (id.includes("lineaVenta.aSerPagado")){
+            dto.lineasVentaPendienteDePago
+            .filter(linea => linea.id == id.split(".")[2])
+            .map(linea => {
+              linea.aSerPagado = event.target.checked;
+
+              return linea
+            });
+            console.log(dto.lineasVentaPendienteDePago);
         }
         this.setState({dto: dto});
       }
@@ -116,6 +145,25 @@ class CuentaCorrienteCliente extends GenericComponent {
             showModal: false
           })
         }
+      }
+
+      async handlePago() {
+        const { dto } = this.state;
+        dto.usuarioId = SecurityContext.getPrincipal().id;
+    
+        var response;
+        response = await this.api.registerPago(dto);
+    
+        if (!response.error) {
+          this.showOkAlert("El pago se registro correctamente.");
+          this.setState({
+            dto: response.result,
+            editable : false
+          })
+        } else {
+          this.showErrorAlert("El pago no pudo ser guardado.");
+        }
+        this.handleHideModal();
       }
     
       handleShowModal(id) {
@@ -253,11 +301,13 @@ class CuentaCorrienteCliente extends GenericComponent {
                     <td>{this.formatDate(cuentaCorrienteCliente.fechaCreacion)}</td>
                     <td>
                       <ButtonGroup>
-                        <Button 
+                        <Button title="Ver Detalle"
                           variant="primary" href={"/cuentaCorrienteCliente/view/" + cuentaCorrienteCliente.id} ><ZoomIn size={20}/></Button>
-                        <Button 
+                        <Button title="Editar"
                           variant="primary" href={"/cuentaCorrienteCliente/edit/" + cuentaCorrienteCliente.id} ><Pencil size={20}/></Button>
-                        <Button 
+                        <Button title="Registrar Pago"
+                          variant="primary" href={"/cuentaCorrienteCliente/pago/" + cuentaCorrienteCliente.id} ><CashStack size={20}/></Button>
+                        <Button title="Eliminar"
                           id={"delete.cuentaCorrienteCliente." + cuentaCorrienteCliente.id} variant="danger" onClick={this.handleShowModal.bind(this, cuentaCorrienteCliente.id)} ><Trash size={20}/></Button>
                       </ButtonGroup>
                     </td>
@@ -336,6 +386,140 @@ class CuentaCorrienteCliente extends GenericComponent {
             </Form.Group>
           </>
         );
+      }
+
+      renderPago() {
+        const { dto, editable, alert } = this.state;
+
+        return (
+          <Form>
+            {alert}
+            <Form.Group as={Row} controlId="cuentaCorrienteCliente">
+              <Form.Label column sm="2">
+                Id
+              </Form.Label>
+              <Col sm="2">
+                <Form.Control type="text" readOnly defaultValue={dto.id} />
+              </Col>
+              <Form.Label column sm="2">
+                Username
+              </Form.Label>
+              <Col sm="6">
+                <Form.Control type="text" id="cuentaCorrienteCliente.username"  readOnly={!editable} defaultValue={dto.username} onChange={this.handleChange}/>
+              </Col>
+            </Form.Group>
+            <Form.Group as={Row} controlId="cuentaCorrienteCliente">
+              <Form.Label column sm="2">
+                Apellido
+              </Form.Label>
+              <Col sm="4">
+                <Form.Control type="text" id="cuentaCorrienteCliente.apellido" readOnly={!editable} defaultValue={dto.apellido} onChange={this.handleChange}/>
+              </Col> 
+              <Form.Label column sm="2">
+                Nombre
+              </Form.Label>
+              <Col sm="4">
+                <Form.Control type="text" id="cuentaCorrienteCliente.nombre" readOnly={!editable} defaultValue={dto.nombre} onChange={this.handleChange}/>
+              </Col>
+              </Form.Group>
+
+            <hr />
+
+            <Form.Group as={Row} controlId="cuentaCorrienteCliente">
+            <Form.Label column center sm="12"><h4>Estado</h4></Form.Label>
+            </Form.Group>
+            <Form.Group as={Row} controlId="cuentaCorrienteCliente">
+            <Table striped bordered hover>
+              <thead>
+                  <tr>
+                  <th>Articulo</th>
+                  <th>Cantidad</th>
+                  <th>Precio</th>
+                  <th>Cantidad Pagar</th>
+                  <th>Subtotal Pagar</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {dto.estadoCuentaCorrienteDtos.sort((a, b) => b.id - a.id).map((estado) =>
+                      <tr>
+                      <td>{estado.articulo.nombre}</td>
+                      <td>{estado.cantidad}</td>
+                      <td>{this.formatCurrency(estado.precio.valor)}</td>
+                      {/* <td>{this.formatCurrency(estado.precio.valor * estado.cantidad)}</td> */}
+                      <td>
+                        <Form.Control type="number" id={"estado.cantidad." + estado.id} defaultValue={0} value={estado.cantidadAPagar} min={0} max={estado.cantidad} onChange={this.handleChange}/>
+                      </td>
+                      <td>{this.formatCurrency(estado.precio.valor * estado.cantidadAPagar)}</td>
+                      </tr>
+                  )}
+              </tbody>
+            </Table>
+            </Form.Group>
+
+            <hr />
+
+            <Form.Group as={Row} controlId="cuentaCorrienteCliente">
+            <Form.Label column center sm="12"><h4>Ventas con Precio Congelado</h4></Form.Label>
+            </Form.Group>
+            <Form.Group as={Row} controlId="cuentaCorrienteCliente">
+            <Table striped bordered hover>
+              <thead>
+                  <tr>
+                  <th>Articulo</th>
+                  <th>Cantidad</th>
+                  <th>Precio</th>
+                  <th>Subtotal</th>
+                  <th>Pagar</th>
+                  <th>Subtotal Pagar</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {dto.lineasVentaPendienteDePago.sort((a, b) => b.id - a.id).map((lineaVenta) =>
+                      <tr>
+                      <td>{lineaVenta.articuloNombre}</td>
+                      <td>{lineaVenta.cantidad}</td>
+                      <td>{this.formatCurrency(lineaVenta.precio)}</td>
+                      <td>{this.formatCurrency(lineaVenta.precio * lineaVenta.cantidad)}</td>
+                      <td>
+                        <Form.Check type="switch" id={"lineaVenta.aSerPagado." + lineaVenta.id} label="" checked={lineaVenta.aSerPagado} onChange={this.handleChange} />
+                      </td>
+                      <td>{lineaVenta.aSerPagado ? this.formatCurrency(lineaVenta.precio * lineaVenta.cantidad) : this.formatCurrency(0)}</td>
+                      </tr>
+                  )}
+              </tbody>
+            </Table>
+            </Form.Group>
+
+            <Form.Group as={Row} controlId="venta">
+              <Form.Label column center sm="8"></Form.Label>
+              <Form.Label column center sm="2">
+                Total
+              </Form.Label>
+              <Col sm="2">
+                <Form.Control plaintext readOnly 
+                  value={
+                    this.formatCurrency(
+                      dto.estadoCuentaCorrienteDtos.map(a => a.precio.valor * a.cantidadAPagar).reduce((a, b) => a + b, 0) +
+                      dto.lineasVentaPendienteDePago.filter(a => a.aSerPagado).map(a => a.precio * a.cantidad).reduce((a, b) => a + b, 0) 
+                    )} />
+              </Col>
+            </Form.Group>
+
+            <Form.Group as={Row} controlId="cuentaCorrienteCliente">
+              <Col sm="6">
+                <Button variant="primary" onClick={this.props.history.goBack}>
+                  Volver
+                </Button>
+              </Col>
+              <Col sm="6">
+                <Button variant="success" onClick={this.handlePago}>
+                  Pagar
+                </Button>
+              </Col>
+            </Form.Group>
+          </Form>
+        )
+
       }
       
       renderAlta(){
@@ -435,6 +619,63 @@ class CuentaCorrienteCliente extends GenericComponent {
                 <Form.Control type="text" id="cuentaCorrienteCliente.apellido" readOnly={!editable} defaultValue={dto.apellido} onChange={this.handleChange}/>
               </Col> 
             </Form.Group>
+
+            <hr />
+
+            <Form.Group as={Row} controlId="cuentaCorrienteCliente">
+            <Form.Label column center sm="12"><h4>Estado</h4></Form.Label>
+            </Form.Group>
+            <Form.Group as={Row} controlId="cuentaCorrienteCliente">
+            <Table striped bordered hover>
+              <thead>
+                  <tr>
+                  <th>Articulo</th>
+                  <th>Cantidad</th>
+                  <th>Precio</th>
+                  <th>Acciones</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {dto.estadoCuentaCorrienteDtos.sort((a, b) => b.id - a.id).map((estado) =>
+                      <tr>
+                      <td>{estado.articulo.nombre}</td>
+                      <td>{estado.cantidad}</td>
+                      <td>{this.formatCurrency(estado.precio.valor)}</td>
+                      <td>{this.formatCurrency(estado.precio.valor * estado.cantidad)}</td>
+                      </tr>
+                  )}
+              </tbody>
+            </Table>
+            </Form.Group>
+
+            <hr />
+
+            <Form.Group as={Row} controlId="cuentaCorrienteCliente">
+            <Form.Label column center sm="12"><h4>Ventas con Precio Congelado</h4></Form.Label>
+            </Form.Group>
+            <Form.Group as={Row} controlId="cuentaCorrienteCliente">
+            <Table striped bordered hover>
+              <thead>
+                  <tr>
+                  <th>Articulo</th>
+                  <th>Cantidad</th>
+                  <th>Precio</th>
+                  <th>Acciones</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {dto.lineasVentaPendienteDePago.sort((a, b) => b.id - a.id).map((lineaVenta) =>
+                      <tr>
+                      <td>{lineaVenta.articuloNombre}</td>
+                      <td>{lineaVenta.cantidad}</td>
+                      <td>{this.formatCurrency(lineaVenta.precio)}</td>
+                      <td>{this.formatCurrency(lineaVenta.precio * lineaVenta.cantidad)}</td>
+                      </tr>
+                  )}
+              </tbody>
+            </Table>
+            </Form.Group>
+
             <Form.Group as={Row} controlId="cuentaCorrienteCliente">
               <Col sm="6">
                 <Button variant="primary" onClick={this.props.history.goBack}>
@@ -466,6 +707,8 @@ class CuentaCorrienteCliente extends GenericComponent {
               return this.renderSingle();
             case 'aprobacion':
               return this.renderAprobacion();
+            case 'pago':
+              return this.renderPago();
             case 'new':
               return this.renderAlta();
             default:

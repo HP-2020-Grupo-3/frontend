@@ -433,15 +433,18 @@ class Venta extends GenericComponent {
               value={this.formatCurrency(subtotal)} />
           </Col>
         </Form.Group>
-        <Form.Group as={Row} controlId="venta">
-          <Form.Label column center sm="8"></Form.Label>
-          <Form.Label column center sm="2">
-            Descuento
-          </Form.Label>
-          <Col sm="2">
-            {this.renderComboBox("venta.currentDescuento", dto.currentDescuento, dto.availableDescuento, editable, "displayText")}
-          </Col>
-        </Form.Group>
+        { dto.currentMedioPago.id !== 5 ?
+          <Form.Group as={Row} controlId="venta">
+            <Form.Label column center sm="8"></Form.Label>
+            <Form.Label column center sm="2">
+              Descuento
+            </Form.Label>
+            <Col sm="2">
+              {this.renderComboBox("venta.currentDescuento", dto.currentDescuento, dto.availableDescuento, editable, "displayText")}
+            </Col>
+          </Form.Group>
+          : '' }
+        
         <Form.Group as={Row} controlId="venta">
           <Form.Label column center sm="8"></Form.Label>
           <Form.Label column center sm="2">
