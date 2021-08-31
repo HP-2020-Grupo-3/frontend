@@ -10,6 +10,9 @@ import Alert from 'react-bootstrap/Alert';
 import { Plus, Trash, Pencil, ZoomIn, CheckSquare, CashStack} from 'react-bootstrap-icons';
 import SecurityContext from '../security/securityContext'
 import CuentaCorrienteClienteAPI from '../cuentaCorrienteCliente/cuentaCorrienteClienteAPI';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { Dropdown } from 'react-bootstrap';
+import { DropdownButton } from 'react-bootstrap';
 
 class CuentaCorrienteCliente extends GenericComponent {
     constructor(props) {
@@ -27,15 +30,21 @@ class CuentaCorrienteCliente extends GenericComponent {
       this.handleApprove = this.handleApprove.bind(this);
       this.handleCreate = this.handleCreate.bind(this);
       this.handlePago = this.handlePago.bind(this);
-      
-      this.setState({
+      this.handleFilter = this.handleFilter.bind(this);
+      var filterFunction = function(cuentaCorrienteCliente, filterText) {return cuentaCorrienteCliente.username.toLowerCase().includes(filterText.toLowerCase())}
+
+      this.state = {
         userRole: null,
         ccToApprove: null,
         usuarioToCreateCC: null,
         showApproveModal: false,
         showCreateModal: null,
-        idToDelete: null
-      });
+        idToDelete: null,
+        filterText: "",
+        filterBy: "username",
+        filterLabel: "Nombre de usuario",
+        filterFunction: filterFunction
+      };
     }
 
     async componentDidMount() {
@@ -69,6 +78,7 @@ class CuentaCorrienteCliente extends GenericComponent {
         const dto = this.state.dto;
         const total = this.state.total;
         const id = event.target.id;
+        var filterText = this.state.filterText;
     
         if (id === "cuentaCorrienteCliente.username"){
           dto.username = event.target.value;      
@@ -93,8 +103,10 @@ class CuentaCorrienteCliente extends GenericComponent {
               return linea
             });
             console.log(dto.lineasVentaPendienteDePago);
+        } else if (id === "filterText"){
+          filterText = event.target.value;
         }
-        this.setState({dto: dto});
+        this.setState({dto: dto, filterText: filterText});
       }
 
       async handleUpsert() {
@@ -255,8 +267,25 @@ class CuentaCorrienteCliente extends GenericComponent {
         }
       }
 
+      handleFilter(param) {
+        var filterLabel, filterFunction;
+        const filterBy = this.state.filterBy
+    
+        if (param === "username"){
+          filterLabel = "Nombre de usuario";
+          filterFunction = function(cuentaCorrienteCliente, filterText) {return cuentaCorrienteCliente.username.toLowerCase().includes(filterText.toLowerCase())}
+        } else if (param === "nombre"){
+          filterLabel = "Nombre";
+          filterFunction = function(cuentaCorrienteCliente, filterText) {return cuentaCorrienteCliente.nombre.toLowerCase().includes(filterText.toLowerCase())}
+        } else if (param === "apellido"){
+          filterLabel = "Apellido";
+          filterFunction = function(cuentaCorrienteCliente, filterText) {return cuentaCorrienteCliente.apellido.toLowerCase().includes(filterText.toLowerCase())}
+        } 
+        this.setState({ filterBy: param, filterLabel: filterLabel, filterFunction: filterFunction});
+      }
+
       renderList() {
-        const { dto, alert, showModal } = this.state;
+        const { dto, alert, showModal, filterBy, filterLabel, filterText, filterFunction } = this.state;
         var showAprobacion = false;
 
         if (this.state.userRole === 'ROLE_ADMIN' & dto.cantidadAprobacion > 0) {
@@ -280,6 +309,15 @@ class CuentaCorrienteCliente extends GenericComponent {
             </Alert>
             <h1>Cuentas Corrientes<Button variant="primary" href={"/cuentaCorrienteCliente/new"} ><Plus size={25}/></Button></h1>
             {alert}
+            <InputGroup className="mb-3">
+              <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">
+                <Dropdown.Item onClick={() => this.handleFilter("username")}>Nombre de usuario</Dropdown.Item>
+                <Dropdown.Item onClick={() => this.handleFilter("nombre")}>Nombre</Dropdown.Item>
+                <Dropdown.Item onClick={() => this.handleFilter("apellido")}>Apellido</Dropdown.Item>
+              </DropdownButton>
+              <InputGroup.Text>{filterLabel}</InputGroup.Text>
+              <Form.Control type="text" id="filterText" placeholder="escriba aquí para filtrar" onChange={this.handleChange}  />
+            </InputGroup>
             <Table striped bordered hover>
             <thead>
                 <tr>
@@ -292,7 +330,8 @@ class CuentaCorrienteCliente extends GenericComponent {
                 </tr>
             </thead>
             <tbody>
-                {dto.cuentaCorrienteClienteDtos.map((cuentaCorrienteCliente) =>
+                {dto.cuentaCorrienteClienteDtos.filter(cuentaCorrienteCliente => filterFunction(cuentaCorrienteCliente, filterText))
+                    .map((cuentaCorrienteCliente) =>
                     <tr>
                     <td>{cuentaCorrienteCliente.id}</td>
                     <td>{cuentaCorrienteCliente.username}</td>
@@ -320,7 +359,7 @@ class CuentaCorrienteCliente extends GenericComponent {
       }
     
       renderAprobacion() {
-        const { dto, alert, showModal } = this.state;
+        const { dto, alert, showModal, filterBy, filterLabel, filterText, filterFunction } = this.state;
         return (
           <>
             {this.renderModalDialog(
@@ -345,6 +384,15 @@ class CuentaCorrienteCliente extends GenericComponent {
             )}
             <h1>Aprobaciones Pendientes</h1>
             {alert}
+            <InputGroup className="mb-3">
+              <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">
+                <Dropdown.Item onClick={() => this.handleFilter("username")}>Nombre de usuario</Dropdown.Item>
+                <Dropdown.Item onClick={() => this.handleFilter("nombre")}>Nombre</Dropdown.Item>
+                <Dropdown.Item onClick={() => this.handleFilter("apellido")}>Apellido</Dropdown.Item>
+              </DropdownButton>
+              <InputGroup.Text>{filterLabel}</InputGroup.Text>
+              <Form.Control type="text" id="filterText" placeholder="escriba aquí para filtrar" onChange={this.handleChange}  />
+            </InputGroup>
             <Table striped bordered hover>
             <thead>
                 <tr>
@@ -357,7 +405,8 @@ class CuentaCorrienteCliente extends GenericComponent {
                 </tr>
             </thead>
             <tbody>
-                {dto.map((cuentaCorrienteClienteAprobacion) =>
+                {dto.filter(cuentaCorrienteClienteAprobacion => filterFunction(cuentaCorrienteClienteAprobacion, filterText))
+                    .map((cuentaCorrienteClienteAprobacion) =>
                     <tr>
                     <td>{cuentaCorrienteClienteAprobacion.id}</td>
                     <td>{cuentaCorrienteClienteAprobacion.username}</td>

@@ -9,7 +9,9 @@ import Col from 'react-bootstrap/Col';
 import Alert from 'react-bootstrap/Alert';
 import Modal from 'react-bootstrap/Modal';
 import { Plus } from 'react-bootstrap-icons';
-
+import InputGroup from 'react-bootstrap/InputGroup';
+import { Dropdown } from 'react-bootstrap';
+import { DropdownButton } from 'react-bootstrap';
 import UsuarioAPI from '../usuario/usuarioAPI';
 
 class Usuario extends GenericComponent {
@@ -21,6 +23,14 @@ class Usuario extends GenericComponent {
     this.handleShowModal = this.handleShowModal.bind(this);
     this.handleHideModal = this.handleHideModal.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    this.handleFilter = this.handleFilter.bind(this);
+    var filterFunction = function(usuario, filterText) {return usuario.username.toLowerCase().includes(filterText.toLowerCase())}
+    this.state = {
+      filterText: "",
+      filterBy: "username",
+      filterLabel: "Nombre de usuario",
+      filterFunction: filterFunction
+    };
   }
 
   async componentDidMount() {
@@ -40,7 +50,7 @@ class Usuario extends GenericComponent {
   handleChange(event) {
     const dto = this.state.dto;
     const id = event.target.id;
-   
+    var filterText = this.state.filterText;
 
     
     if (id === "usuario.username"){
@@ -55,9 +65,11 @@ class Usuario extends GenericComponent {
       dto.email = event.target.value;
     } else if (id === "usuario.role"){
       dto.currentRole = JSON.parse(event.target.value)
+    } else if (id === "filterText"){
+      filterText = event.target.value;
     } 
           
-    this.setState({dto: dto});
+    this.setState({dto: dto, filterText: filterText});
 
   }
 
@@ -133,8 +145,32 @@ class Usuario extends GenericComponent {
     })
   }  
 
+  handleFilter(param) {
+    var filterLabel, filterFunction;
+    const filterBy = this.state.filterBy
+
+    if (param === "username"){
+      filterLabel = "Nombre de usuario";
+      filterFunction = function(usuario, filterText) {return usuario.username.toLowerCase().includes(filterText.toLowerCase())}
+    } else if (param === "nombre"){
+      filterLabel = "Nombre";
+      filterFunction = function(usuario, filterText) {return usuario.nombre.toLowerCase().includes(filterText.toLowerCase())}
+    } else if (param === "role"){
+      filterLabel = "Rol";
+      filterFunction = function(usuario, filterText) {return usuario.role.name.toLowerCase().includes(filterText.toLowerCase())}
+    } else if (param === "apellido"){
+      filterLabel = "Apellido";
+      filterFunction = function(usuario, filterText) {return usuario.apellido.toLowerCase().includes(filterText.toLowerCase())}
+    } else if (param === "email"){
+      filterLabel = "E-Mail";
+      filterFunction = function(usuario, filterText) {return usuario.email.toLowerCase().includes(filterText.toLowerCase())}
+    }
+    this.setState({ filterBy: param, filterLabel: filterLabel, filterFunction: filterFunction});
+  }
+
   renderList() {
-    const { dto, alert, showModal } = this.state;
+    const { dto, alert, showModal, filterText, filterBy, filterLabel, filterFunction } = this.state;
+    console.log("filterText: ", filterText);
     return (
       <>
         <Modal show={showModal} onHide={this.handleHideModal} >
@@ -150,6 +186,17 @@ class Usuario extends GenericComponent {
         </Modal>
         <h1>Usuarios<Button variant="primary" href={"/usuario/new"} ><Plus size={25}/></Button></h1>
         {alert}
+        <InputGroup className="mb-3">
+         <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">
+            <Dropdown.Item onClick={() => this.handleFilter("username")}>Nombre de usuario</Dropdown.Item>
+            <Dropdown.Item onClick={() => this.handleFilter("nombre")}>Nombre</Dropdown.Item>
+            <Dropdown.Item onClick={() => this.handleFilter("apellido")}>Apellido</Dropdown.Item>
+            <Dropdown.Item onClick={() => this.handleFilter("email")}>E-Mail</Dropdown.Item>
+            <Dropdown.Item onClick={() => this.handleFilter("role")}>Rol</Dropdown.Item>
+          </DropdownButton>
+          <InputGroup.Text>{filterLabel}</InputGroup.Text>
+          <Form.Control type="text" id="filterText" placeholder="escriba aquí para filtrar" onChange={this.handleChange}  />
+        </InputGroup>
         <Table striped bordered hover>
         <thead>
             <tr>
@@ -163,7 +210,8 @@ class Usuario extends GenericComponent {
             </tr>
         </thead>
         <tbody>
-            {dto.map((usuario) =>
+            {dto.filter(usuario =>filterFunction(usuario, filterText))
+                .map((usuario) =>
                 <tr>
                 <td>{usuario.id}</td>
                 <td>{usuario.username}</td>

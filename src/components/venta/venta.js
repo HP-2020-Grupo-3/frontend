@@ -16,6 +16,9 @@ import PredictiveComboBoxArticulo from '../ui/predictiveComboBoxArticulo';
 import PortalWindow from '../ui/portalWindow';
 import ComprobantePagoImprimible from '../ui/comprobantePagoImprimible';
 import PredictiveComboBoxCuentaCorriente from '../ui/predictiveComboBoxCuentaCorriente';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { Dropdown } from 'react-bootstrap';
+import { DropdownButton } from 'react-bootstrap';
 
 class Venta extends GenericComponent {
   constructor(props) {
@@ -31,9 +34,15 @@ class Venta extends GenericComponent {
     this.handlerPrintComprobante = this.handlerPrintComprobante.bind(this);
     this.toggleWindowPortal = this.toggleWindowPortal.bind(this);
     this.closeWindowPortal = this.closeWindowPortal.bind(this);
-
+    this.handleFilter = this.handleFilter.bind(this);
+    var filterFunction = function(venta, filterText) {return venta.id.toString().includes(filterText.toLowerCase())}
     this.state = {
-      showWindowPortal: false
+      showWindowPortal: false,
+      filterText: "",
+      filterBy: "id",
+      filterLabel: "N° de Venta",
+      inputType: "text",
+      filterFunction: filterFunction
     };
   }
 
@@ -55,6 +64,7 @@ class Venta extends GenericComponent {
   handleChange(event) {
     const dto = this.state.dto;
     const id = event.target.id;
+    var filterText = this.state.filterText;
     
     if (id === "venta.numeroComprobante"){
       dto.numeroComprobante = event.target.value;      
@@ -76,11 +86,10 @@ class Venta extends GenericComponent {
       dto.selectedCuentaCorrienteClienteVentaDto = JSON.parse(event.target.value);
     } else if (id === "venta.precioCongelado"){      
       dto.precioCongelado = event.target.checked;
+    } else if (id === "filterText"){
+      filterText = event.target.value;
     }
-    
-    console.log("dto")
-    console.log(dto)
-    this.setState({dto: dto});
+    this.setState({dto: dto, filterText: filterText});
 
   }
 
@@ -209,9 +218,25 @@ class Venta extends GenericComponent {
   closeWindowPortal() {
     this.setState({ showWindowPortal: false })
   }
+  
+  handleFilter(param) {
+    var filterLabel, filterFunction;
+    var inputType = this.state.inputType;
+
+    if (param === "id"){
+      filterLabel = "N° de Venta";
+      inputType = "text";
+      filterFunction = function(venta, filterText) {return venta.id.toString().includes(filterText.toLowerCase())}
+    } else if (param === "fecha"){
+      filterLabel = "Fecha";
+      inputType = "date"
+      filterFunction = function(venta, filterText) {return venta.fecha.includes(filterText)}
+    } 
+    this.setState({ filterBy: param, filterLabel: filterLabel, inputType: inputType,filterFunction: filterFunction});
+  }
 
   renderList() {
-    const { dto, alert, showModal } = this.state;
+    const { dto, alert, showModal, inputType, filterLabel, filterText, filterFunction } = this.state;
     return (
       <>          
         {this.state.showWindowPortal && (
@@ -231,19 +256,29 @@ class Venta extends GenericComponent {
             </Button>
           </Modal.Footer>
         </Modal>
-        <h1>Venta<Button variant="primary" href={"/venta/new"} ><Plus size={25}/></Button></h1>
+        <h1>Ventas<Button variant="primary" href={"/venta/new"} ><Plus size={25}/></Button></h1>
         {alert}
+        <InputGroup className="mb-3">
+         <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">
+            <Dropdown.Item onClick={() => this.handleFilter("id")}>N° de Venta</Dropdown.Item>
+            <Dropdown.Item onClick={() => this.handleFilter("fecha")}>Fecha</Dropdown.Item>
+          </DropdownButton>
+          <InputGroup.Text>{filterLabel}</InputGroup.Text>
+          <Form.Control type={inputType} id="filterText" placeholder="escriba aquí para filtrar" onChange={this.handleChange}  />
+        </InputGroup>
         <Table striped bordered hover>
         <thead>
             <tr>
-            <th>Venta Nro.</th>
+            <th>N° de Venta</th>
             <th>Fecha</th>
             <th>Total</th>
             <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            {dto.sort((a, b) => b.id - a.id).map((venta) =>
+            {dto.sort((a, b) => b.id - a.id)
+                .filter(venta =>filterFunction(venta, filterText))
+                .map((venta) =>
                 <tr>
                 <td>{this.formatComprobante(venta.numeroComprobante)}</td>
                 <td>{this.formatDate(venta.fecha)}</td>

@@ -13,6 +13,9 @@ import ComprobantePagoAPI from '../comprobantePago/comprobantePagoAPI';
 import VentaAPI from '../venta/ventaAPI';
 import PortalWindow from '../ui/portalWindow';
 import ComprobantePagoImprimible from '../ui/comprobantePagoImprimible';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { Dropdown } from 'react-bootstrap';
+import { DropdownButton } from 'react-bootstrap';
 
 class ComprobantePago extends GenericComponent {
   constructor(props) {
@@ -25,10 +28,16 @@ class ComprobantePago extends GenericComponent {
     this.handleHideModal = this.handleHideModal.bind(this);
     this.toggleWindowPortal = this.toggleWindowPortal.bind(this);
     this.closeWindowPortal = this.closeWindowPortal.bind(this);
-
+    this.handleFilter = this.handleFilter.bind(this);
+    var filterFunction = function(comprobantePago, filterText) {return comprobantePago.numeroComprobante.toString().toLowerCase().includes(filterText.toLowerCase())}
 
     this.state = {
-      showWindowPortal: false
+      showWindowPortal: false,
+      inputType: "text",
+      filterText: "",
+      filterBy: "numeroComprobante",
+      filterLabel: "N° Comprobante",
+      filterFunction: filterFunction
     };
   }
 
@@ -49,14 +58,17 @@ class ComprobantePago extends GenericComponent {
   handleChange(event) {
     const dto = this.state.dto;
     const id = event.target.id;
-    
+    var filterText = this.state.filterText;
+
     if (id === "cp.numeroFactura") {
       dto.numeroFactura = event.target.value;
     } else if (id === "cp.nota"){
       dto.nota = event.target.value;
-    }
+    } else if (id === "filterText"){
+      filterText = event.target.value;
+    } 
     
-    this.setState({dto: dto});
+    this.setState({dto: dto, filterText: filterText});
   }
 
   async handleUpsert() {
@@ -116,8 +128,28 @@ class ComprobantePago extends GenericComponent {
     this.setState({ showWindowPortal: false })
   }
 
+  handleFilter(param) {
+    var filterLabel, filterFunction;
+    var inputType = this.state.inputType;
+
+    if (param === "numeroComprobante"){
+      filterLabel = "N° Comprobante";
+      inputType = "text";
+      filterFunction = function(comprobantePago, filterText) {return comprobantePago.numeroComprobante.toString().toLowerCase().includes(filterText.toLowerCase())}
+    } else if (param === "numeroFactura"){
+      filterLabel = "N° Factura";
+      inputType = "text";
+      filterFunction = function(comprobantePago, filterText) {return comprobantePago.numeroFactura.toLowerCase().includes(filterText.toLowerCase())}
+    } else if (param === "fecha"){
+      filterLabel = "Fecha";
+      inputType = "date";
+      filterFunction = function(comprobantePago, filterText) {return comprobantePago.fecha.includes(filterText)}
+    } 
+    this.setState({ filterBy: param, filterLabel: filterLabel, inputType: inputType, filterFunction: filterFunction});
+  }
+
   renderList() {
-    const { dto, alert, showModal } = this.state;
+    const { dto, alert, showModal, filterText, inputType, filterLabel, filterFunction } = this.state;
   
     return (
       <>
@@ -128,6 +160,15 @@ class ComprobantePago extends GenericComponent {
         )}
         <h1>Comprobantes de Pagos</h1>
         {alert}
+        <InputGroup className="mb-3">
+         <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">
+            <Dropdown.Item onClick={() => this.handleFilter("numeroComprobante")}>N° Comprobante</Dropdown.Item>
+            <Dropdown.Item onClick={() => this.handleFilter("fecha")}>Fecha</Dropdown.Item>
+            <Dropdown.Item onClick={() => this.handleFilter("numeroFactura")}>N° Factura</Dropdown.Item>
+          </DropdownButton>
+          <InputGroup.Text>{filterLabel}</InputGroup.Text>
+          <Form.Control type={inputType} id="filterText" placeholder="escriba aquí para filtrar" onChange={this.handleChange}  />
+        </InputGroup>
         <Table striped bordered hover>
         <thead>
             <tr>
@@ -138,9 +179,11 @@ class ComprobantePago extends GenericComponent {
             </tr>
         </thead>
         <tbody>
-            {dto.map((comprobantePago) =>
+            {dto.sort((a, b) => b.id - a.id)
+                .filter(comprobantePago => filterFunction(comprobantePago, filterText))
+                .map((comprobantePago) =>
                 <tr>
-                <td>{comprobantePago.numeroComprobante}</td>
+                <td>{this.formatComprobante(comprobantePago.numeroComprobante)}</td>
                 <td>{this.formatDate(comprobantePago.fecha)}</td>
                 <td>{comprobantePago.numeroFactura}</td>
                 <td>{this.formatCurrency(comprobantePago.totalVenta)}</td>

@@ -12,6 +12,8 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import { Plus, Trash, Pencil, ZoomIn } from 'react-bootstrap-icons';
 import RubroAPI from '../rubro/rubroAPI';
 import ArticuloAPI from '../articulo/articuloAPI';
+import { Dropdown } from 'react-bootstrap';
+import { DropdownButton } from 'react-bootstrap';
 
 class Articulo extends GenericComponent {
   constructor(props) {
@@ -22,6 +24,14 @@ class Articulo extends GenericComponent {
     this.handleShowModal = this.handleShowModal.bind(this);
     this.handleHideModal = this.handleHideModal.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    this.handleFilter = this.handleFilter.bind(this);
+    var filterFunction = function(articulo, filterText) {return articulo.nombre.toLowerCase().includes(filterText.toLowerCase())}
+    this.state = {
+      filterText: "",
+      filterBy: "nombre",
+      filterLabel: "Nombre",
+      filterFunction: filterFunction
+    };
   }
 
   async componentDidMount() {
@@ -53,7 +63,7 @@ class Articulo extends GenericComponent {
   handleChange(event) {
     const dto = this.state.dto;
     const id = event.target.id;
-    
+    var filterText = this.state.filterText;
     if (id === "articulo.nombre"){
       dto.nombre=event.target.value;      
     } else if (id === "articulo.descripcion"){      
@@ -68,9 +78,11 @@ class Articulo extends GenericComponent {
       dto.stockDeseado = event.target.value;
     } else if (id === "articulo.rubro"){
       dto.currentRubro = JSON.parse(event.target.value);
-    } 
+    } else if (id === "filterText"){
+      filterText = event.target.value;
+    }
           
-    this.setState({dto: dto});
+    this.setState({dto: dto, filterText: filterText});
 
   }
 
@@ -144,8 +156,25 @@ class Articulo extends GenericComponent {
     })
   }  
 
+  handleFilter(param) {
+    var filterLabel, filterFunction;
+
+
+    if (param === "nombre"){
+      filterLabel = "Nombre";
+      filterFunction = function(articulo, filterText) {return articulo.nombre.toLowerCase().includes(filterText.toLowerCase())}
+    } else if (param === "descripcion"){
+      filterLabel = "Descripción";
+      filterFunction = function(articulo, filterText) {return articulo.descripcion.toLowerCase().includes(filterText.toLowerCase())}
+    } else if (param === "currentRubro.nombre"){
+      filterLabel = "Rubro";
+      filterFunction = function(articulo, filterText) {return articulo.currentRubro.nombre.toLowerCase().includes(filterText.toLowerCase())}
+    }
+    this.setState({ filterBy: param, filterLabel: filterLabel, filterFunction: filterFunction});
+  }
+
   renderList() {
-    const { dto, alert, showModal } = this.state;
+    const { dto, alert, showModal, filterText, filterBy, filterLabel, filterFunction } = this.state;
     return (
       <>
         <Modal show={showModal} onHide={this.handleHideModal} >
@@ -161,6 +190,15 @@ class Articulo extends GenericComponent {
         </Modal>
         <h1>Artículos<Button variant="primary" href={"/articulo/new"} ><Plus size={25}/></Button></h1>
         {alert}
+        <InputGroup className="mb-3">
+         <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">
+            <Dropdown.Item onClick={() => this.handleFilter("nombre")}>Nombre</Dropdown.Item>
+            <Dropdown.Item onClick={() => this.handleFilter("descripcion")}>Descripción</Dropdown.Item>
+            <Dropdown.Item onClick={() => this.handleFilter("currentRubro.nombre")}>Rubro</Dropdown.Item>
+          </DropdownButton>
+          <InputGroup.Text>{filterLabel}</InputGroup.Text>
+          <Form.Control type="text" id="filterText" placeholder="escriba aquí para filtrar" onChange={this.handleChange}  />
+        </InputGroup>
         <Table striped bordered hover>
         <thead>
             <tr>
@@ -175,7 +213,8 @@ class Articulo extends GenericComponent {
             </tr>
         </thead>
         <tbody>
-            {dto.map((articulo) =>
+            {dto.filter(articulo =>filterFunction(articulo, filterText))
+                .map((articulo) =>
                 <tr>
                 <td>{articulo.id}</td>
                 <td>{articulo.nombre}</td>

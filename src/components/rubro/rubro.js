@@ -9,8 +9,10 @@ import Col from 'react-bootstrap/Col';
 import Alert from 'react-bootstrap/Alert';
 import Modal from 'react-bootstrap/Modal';
 import { Plus } from 'react-bootstrap-icons';
-
+import InputGroup from 'react-bootstrap/InputGroup';
 import RubroAPI from '../rubro/rubroAPI';
+import { Dropdown } from 'react-bootstrap';
+import { DropdownButton } from 'react-bootstrap';
 
 class Rubro extends GenericComponent {
   constructor(props) {
@@ -21,6 +23,9 @@ class Rubro extends GenericComponent {
     this.handleShowModal = this.handleShowModal.bind(this);
     this.handleHideModal = this.handleHideModal.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    this.state = {
+      filterText: ""
+    };
   }
 
   async componentDidMount() {
@@ -39,8 +44,14 @@ class Rubro extends GenericComponent {
 
   handleChange(event) {
     const dto = this.state.dto;
+    const id = event.target.id;
+    var filterText = this.state.filterText;
     dto.nombre = event.target.value;
-    this.setState({dto: dto});
+
+    if (id === "filterText"){
+      filterText = event.target.value;
+    }
+    this.setState({dto: dto, filterText: filterText});
   }
 
   async handleUpsert() {
@@ -115,7 +126,7 @@ class Rubro extends GenericComponent {
   }  
 
   renderList() {
-    const { dto, alert, showModal } = this.state;
+    const { dto, alert, showModal, filterText } = this.state;
     return (
       <>
         <Modal show={showModal} onHide={this.handleHideModal} >
@@ -131,6 +142,13 @@ class Rubro extends GenericComponent {
         </Modal>
         <h1>Rubros<Button variant="primary" href={"/rubro/new"} ><Plus size={25}/></Button></h1>
         {alert}
+        <InputGroup className="mb-3">
+          <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">
+            <Dropdown.Item >Nombre</Dropdown.Item>
+          </DropdownButton>
+          <InputGroup.Text>Nombre</InputGroup.Text>
+          <Form.Control type="text" id="filterText" placeholder="escriba aquí para filtrar" onChange={this.handleChange}  />
+        </InputGroup>
         <Table striped bordered hover>
         <thead>
             <tr>
@@ -140,7 +158,8 @@ class Rubro extends GenericComponent {
             </tr>
         </thead>
         <tbody>
-            {dto.map((rubro) =>
+            {dto.filter(rubro =>rubro.nombre.toLowerCase().includes(filterText.toLowerCase()))
+                .map((rubro) =>
                 <tr>
                 <td>{rubro.id}</td>
                 <td>{rubro.nombre}</td>
