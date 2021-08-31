@@ -102,13 +102,11 @@ class ComprobantePago extends GenericComponent {
     })
   }  
 
-  async toggleWindowPortal(idVenta) {
-    const venta = await this.ventaApi.findById(idVenta)
-
+  async toggleWindowPortal(comprobantePago) {
     this.setState(state => ({
       ...state,
       showWindowPortal: true,
-      venta: venta.result,
+      comprobantePago: comprobantePago,
     }));
   }
   
@@ -123,7 +121,7 @@ class ComprobantePago extends GenericComponent {
       <>
         {this.state.showWindowPortal && (
           <PortalWindow closeWindowPortal={this.closeWindowPortal} >
-            <ComprobantePagoImprimible closeWindowPortal={this.closeWindowPortal} venta={this.state.venta}/>
+            <ComprobantePagoImprimible closeWindowPortal={this.closeWindowPortal} comprobantePago={this.state.comprobantePago}/>
           </PortalWindow>
         )}
         <h1>Comprobantes de Pagos</h1>
@@ -151,7 +149,7 @@ class ComprobantePago extends GenericComponent {
                   <Button 
                     variant="primary" href={"/comprobantePago/edit/" + comprobantePago.id} >Editar Comprobante</Button>
                   <Button 
-                    id={"print.comprobantePago." + comprobantePago.id} variant="primary" onClick={this.toggleWindowPortal.bind(this, comprobantePago.idVenta)} >Imprimir Comprobante</Button>
+                    id={"print.comprobantePago." + comprobantePago.id} variant="primary" onClick={this.toggleWindowPortal.bind(this, comprobantePago)} >Imprimir Comprobante</Button>
                 </ButtonGroup>
                 </td>
                 </tr>
@@ -207,6 +205,34 @@ class ComprobantePago extends GenericComponent {
             <Form.Control type="text" readOnly={!editable} defaultValue={dto.nota} onChange={this.handleChange}/>
           </Col>
         </Form.Group>
+
+        <Form.Group as={Row} controlId="venta">
+          <Form.Label column center sm="12">
+            Articulos
+          </Form.Label>
+        </Form.Group>
+
+        <Table striped bordered hover size="sm">
+        <thead>
+            <tr>
+            <th>Articulo</th>
+            <th>P. Unitario</th>
+            <th>Cantidad</th>
+            <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody align-middle >
+            {dto.lineaVentaDtos.map((linea) =>
+                <tr>
+                <td>{linea.articuloNombre}</td>
+                <td>{this.formatCurrency(linea.precio)}</td>
+                <td>{(linea.cantidad)}</td>
+                <td>{this.formatCurrency(linea.precio * linea.cantidad)}</td>
+                </tr>
+            )}
+        </tbody>
+        </Table>
+
         <Form.Group as={Row} controlId="comprobantePago">
           <Col sm="6">
             <Button variant="primary" href="/comprobantePago/">

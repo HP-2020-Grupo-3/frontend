@@ -21,9 +21,9 @@ class ComprobantePagoImprimible extends GenericComponent {
     }
 
     render() {
-      console.log("VENTA ", this.props.venta);
-      const subtotal = this.props.venta.lineaVentaDtos.reduce((acc, linea) => acc += linea.precio * linea.cantidad, 0 );
-      const total = subtotal - (subtotal * this.props.venta.currentDescuento.valor);
+      console.log("comprobantePago", this.props.comprobantePago);
+      const subtotal = this.props.comprobantePago.lineaVentaDtos.reduce((acc, linea) => acc += linea.precio * linea.cantidad, 0 );
+      const total = subtotal - (subtotal * this.props.comprobantePago.descuento.valor);
       return (
         <Form>
           <Col sm="1"/>
@@ -45,13 +45,13 @@ class ComprobantePagoImprimible extends GenericComponent {
                  Comprobante Nro.
               </Form.Label>
               <Form.Label column sm="3">
-                {this.formatComprobante(this.props.venta.comprobantePago.numeroComprobante)}
+                {this.formatComprobante(this.props.comprobantePago.numeroComprobante)}
               </Form.Label>
               <Form.Label column sm="2">
                 Fecha
               </Form.Label>
              <Form.Label column sm="4">
-               {this.formatDate(this.props.venta.fecha)}
+               {this.formatDate(this.props.comprobantePago.fecha)}
               </Form.Label>
             </Form.Group>
             <hr />
@@ -67,12 +67,12 @@ class ComprobantePagoImprimible extends GenericComponent {
                 </tr>
               </thead>
               <tbody align-middle >
-                {this.props.venta.lineaVentaDtos.map((linea) =>
+                {this.props.comprobantePago.lineaVentaDtos.map((linea) =>
                   <tr>
                   <td>{linea.articuloNombre}</td>
-                  <td>{linea.precio.toFixed(2)}</td>
+                  <td>{this.formatCurrency(linea.precio)}</td>
                   <td>{linea.cantidad}</td>
-                  <td>{(linea.precio * linea.cantidad).toFixed(2)}</td>
+                  <td>{this.formatCurrency(linea.precio * linea.cantidad)}</td>
                   </tr>
                 )}
               </tbody>
@@ -85,7 +85,7 @@ class ComprobantePagoImprimible extends GenericComponent {
               </Form.Label>
               <Col sm="2">
                 <Form.Label plaintext >
-                  {subtotal.toFixed(2)}
+                  {this.formatCurrency(subtotal)}
                 </Form.Label>              
               </Col>
             </Form.Group>
@@ -96,7 +96,7 @@ class ComprobantePagoImprimible extends GenericComponent {
               </Form.Label>
               <Col sm="2">
                 <Form.Label plaintext >
-                  {this.props.venta.currentDescuento.displayText}
+                  {this.props.comprobantePago.descuento.displayText}
                 </Form.Label>              
               </Col>
             </Form.Group>
@@ -107,7 +107,7 @@ class ComprobantePagoImprimible extends GenericComponent {
               </Form.Label>
               <Col sm="2">
                 <Form.Label plaintext >
-                  {total.toFixed(2)}
+                  {this.formatCurrency(total)}
                 </Form.Label>              
               </Col>
             </Form.Group>
