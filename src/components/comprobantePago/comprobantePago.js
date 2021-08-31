@@ -8,7 +8,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Alert from 'react-bootstrap/Alert';
 import Modal from 'react-bootstrap/Modal';
-import { Cpu, Plus } from 'react-bootstrap-icons';
+import { Pencil, ZoomIn, Printer} from 'react-bootstrap-icons';
 import ComprobantePagoAPI from '../comprobantePago/comprobantePagoAPI';
 import VentaAPI from '../venta/ventaAPI';
 import PortalWindow from '../ui/portalWindow';
@@ -174,6 +174,7 @@ class ComprobantePago extends GenericComponent {
             <th>Fecha</th>
             <th>N° Factura</th>
             <th>Monto</th>
+            <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -187,12 +188,16 @@ class ComprobantePago extends GenericComponent {
                 <td>{this.formatCurrency(comprobantePago.totalVenta)}</td>
                 <td>
                 <ButtonGroup>
-                  <Button 
-                    variant="primary" href={"/venta/view/" + comprobantePago.idVenta} >Ver Venta</Button>
-                  <Button 
-                    variant="primary" href={"/comprobantePago/edit/" + comprobantePago.id} >Editar Comprobante</Button>
-                  <Button 
-                    id={"print.comprobantePago." + comprobantePago.id} variant="primary" onClick={this.toggleWindowPortal.bind(this, comprobantePago)} >Imprimir Comprobante</Button>
+                  <Button title="Ver Venta"
+                    variant="primary" 
+                    href={comprobantePago.idVenta !== null ? 
+                      "/venta/view/" + comprobantePago.idVenta
+                      : "/comprobantePago/view/" + comprobantePago.id} ><ZoomIn size={20}/></Button>
+                  <Button title="Editar Comprobante"
+                    variant="primary" href={"/comprobantePago/edit/" + comprobantePago.id} ><Pencil size={20}/></Button>
+                  <Button title="Imprimir Comprobante"
+                    id={"print.comprobantePago." + comprobantePago.id} variant="primary" 
+                    onClick={this.toggleWindowPortal.bind(this, comprobantePago)} ><Printer size={20}/></Button>
                 </ButtonGroup>
                 </td>
                 </tr>

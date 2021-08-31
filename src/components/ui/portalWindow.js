@@ -31,7 +31,6 @@ class PortalWindow extends React.PureComponent {
     }
   
     componentDidMount() {
-
       let externalWindow = window.open('', '', 'width=600,height=400,left=200,top=200');
       externalWindow.document.title = 'Comprobante de Pago';
       let containerEl = document.createElement('div');
@@ -44,12 +43,13 @@ class PortalWindow extends React.PureComponent {
       externalWindow.addEventListener('beforeunload', () => {
         this.props.closeWindowPortal();
       });
-      
     }
-  
+    
     componentWillUnmount() {
       const { externalWindow } = this.state;
-      externalWindow.close();
+      if (externalWindow) {
+        externalWindow.close();
+      }
     }
     
     render() {

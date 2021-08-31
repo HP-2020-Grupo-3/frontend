@@ -8,7 +8,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Alert from 'react-bootstrap/Alert';
 import Modal from 'react-bootstrap/Modal';
-import { Plus } from 'react-bootstrap-icons';
+import { Plus, Trash, Pencil, ZoomIn} from 'react-bootstrap-icons';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { Dropdown } from 'react-bootstrap';
 import { DropdownButton } from 'react-bootstrap';
@@ -184,7 +184,7 @@ class Usuario extends GenericComponent {
             </Button>
           </Modal.Footer>
         </Modal>
-        <h1>Usuarios<Button variant="primary" href={"/usuario/new"} ><Plus size={25}/></Button></h1>
+        <h1>Usuarios<Button title="Nuevo Usuario" variant="primary" href={"/usuario/new"} ><Plus size={25}/></Button></h1>
         {alert}
         <InputGroup className="mb-3">
          <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">
@@ -221,12 +221,12 @@ class Usuario extends GenericComponent {
                 <td>{usuario.role.name}</td>
                 <td>
                 <ButtonGroup>
-                  <Button 
-                    variant="primary" href={"/usuario/view/" + usuario.id} >Ver</Button>
-                  <Button 
-                    variant="primary" href={"/usuario/edit/" + usuario.id} >Editar</Button>
-                  <Button 
-                    id={"delete.usuario." + usuario.id} variant="danger" onClick={this.handleShowModal} >Eliminar</Button>
+                  <Button title="Ver"
+                    variant="primary" href={"/usuario/view/" + usuario.id} ><ZoomIn size={20}/></Button>
+                  <Button title="Editar"
+                    variant="primary" href={"/usuario/edit/" + usuario.id} ><Pencil size={20}/></Button>
+                  <Button title="Eliminar"
+                    id={"delete.usuario." + usuario.id} variant="danger" onClick={this.handleShowModal} ><Trash size={20}/></Button>
                 </ButtonGroup>
                 </td>
                 </tr>

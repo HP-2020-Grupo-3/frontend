@@ -9,7 +9,7 @@ import Col from 'react-bootstrap/Col';
 import Alert from 'react-bootstrap/Alert';
 import Modal from 'react-bootstrap/Modal';
 import Autosuggest from 'react-autosuggest';
-import { Plus, Dot } from 'react-bootstrap-icons';
+import { Plus, ZoomIn, Printer} from 'react-bootstrap-icons';
 import SecurityContext from '../security/securityContext'
 import VentaAPI from '../venta/ventaAPI';
 import PredictiveComboBoxArticulo from '../ui/predictiveComboBoxArticulo';
@@ -205,13 +205,11 @@ class Venta extends GenericComponent {
      
   }
 
-  async toggleWindowPortal(idVenta) {
-    const venta = await this.api.findById(idVenta)
-
+  async toggleWindowPortal(comprobantePagoDto) {
     this.setState(state => ({
       ...state,
       showWindowPortal: true,
-      venta: venta.result,
+      comprobantePago: comprobantePagoDto,
     }));
   }
   
@@ -241,7 +239,7 @@ class Venta extends GenericComponent {
       <>          
         {this.state.showWindowPortal && (
           <PortalWindow closeWindowPortal={this.closeWindowPortal} >
-            <ComprobantePagoImprimible closeWindowPortal={this.closeWindowPortal} venta={this.state.venta}/>
+            <ComprobantePagoImprimible closeWindowPortal={this.closeWindowPortal} comprobantePago={this.state.comprobantePago}/>
           </PortalWindow>
         )}
 
@@ -256,7 +254,7 @@ class Venta extends GenericComponent {
             </Button>
           </Modal.Footer>
         </Modal>
-        <h1>Ventas<Button variant="primary" href={"/venta/new"} ><Plus size={25}/></Button></h1>
+        <h1>Ventas<Button title="Nueva Venta" variant="primary" href={"/venta/new"} ><Plus size={25}/></Button></h1>
         {alert}
         <InputGroup className="mb-3">
          <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">
@@ -288,10 +286,10 @@ class Venta extends GenericComponent {
                 </td>
                 <td>
                 <ButtonGroup>
-                  <Button 
-                    variant="primary" href={"/venta/view/" + venta.id} >Ver</Button>
-                  <Button 
-                    variant="primary" disabled={(venta.medioPago.id === 5)} onClick={this.toggleWindowPortal.bind(this, venta.id)} >Imprimir Comprobante</Button>
+                  <Button title="Ver Detalle"
+                    variant="primary" href={"/venta/view/" + venta.id} ><ZoomIn size={20}/></Button>
+                  <Button title="Imprimir Comprobante" 
+                    variant="primary" disabled={(venta.medioPago.id === 5)} onClick={this.toggleWindowPortal.bind(this, venta.comprobantePagoDto)} ><Printer size={20}/></Button>
                 </ButtonGroup>
                 </td>
                 </tr>
@@ -318,7 +316,7 @@ class Venta extends GenericComponent {
         "Confirmacion",
         "Esta seguro de que desea confirmar la venta?",
         this.handleHideModal, this.handleUpsert,
-        "Cancelar", "Confirmar")}
+        "Cancelar", "Confirmar", "showModal", "success")}
 
       <Form>
         {alert}
@@ -426,7 +424,7 @@ class Venta extends GenericComponent {
               defaultValue={ dto.selectedArticulo ? this.formatCurrency(dto.selectedArticulo.precio * dto.selectedCantidad) : "" } onChange={this.handleChange}/>
           </Col>
           <Col sm="1">
-            <Button variant="success" hidden={!editable || !dto.selectedArticulo} onClick={this.handleAddLineaVenta}>
+            <Button title="Agregar Articulo" variant="success" hidden={!editable || !dto.selectedArticulo} onClick={this.handleAddLineaVenta}>
                 +
             </Button>
           </Col>

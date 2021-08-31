@@ -188,7 +188,7 @@ class Articulo extends GenericComponent {
             </Button>
           </Modal.Footer>
         </Modal>
-        <h1>Artículos<Button variant="primary" href={"/articulo/new"} ><Plus size={25}/></Button></h1>
+        <h1>Artículos<Button title="Nuevo Articulo" variant="primary" href={"/articulo/new"} ><Plus size={25}/></Button></h1>
         {alert}
         <InputGroup className="mb-3">
          <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">

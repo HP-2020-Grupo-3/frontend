@@ -8,7 +8,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Alert from 'react-bootstrap/Alert';
 import Modal from 'react-bootstrap/Modal';
-import { Plus } from 'react-bootstrap-icons';
+import { Plus, Trash, Pencil, ZoomIn} from 'react-bootstrap-icons';
 import InputGroup from 'react-bootstrap/InputGroup';
 import RubroAPI from '../rubro/rubroAPI';
 import { Dropdown } from 'react-bootstrap';
@@ -140,7 +140,7 @@ class Rubro extends GenericComponent {
             </Button>
           </Modal.Footer>
         </Modal>
-        <h1>Rubros<Button variant="primary" href={"/rubro/new"} ><Plus size={25}/></Button></h1>
+        <h1>Rubros<Button title="Nuevo Rubro" variant="primary" href={"/rubro/new"} ><Plus size={25}/></Button></h1>
         {alert}
         <InputGroup className="mb-3">
           <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">
@@ -165,12 +165,12 @@ class Rubro extends GenericComponent {
                 <td>{rubro.nombre}</td>
                 <td>
                 <ButtonGroup>
-                  <Button 
-                    variant="primary" href={"/rubro/view/" + rubro.id} >Ver</Button>
-                  <Button 
-                    variant="primary" href={"/rubro/edit/" + rubro.id} >Editar</Button>
-                  <Button 
-                    id={"delete.rubro." + rubro.id} variant="danger" onClick={this.handleShowModal} >Eliminar</Button>
+                  <Button title="Ver"
+                    variant="primary" href={"/rubro/view/" + rubro.id} ><ZoomIn size={20}/></Button>
+                  <Button title="Editar"
+                    variant="primary" href={"/rubro/edit/" + rubro.id} ><Pencil size={20}/></Button>
+                  <Button title="Eliminar"
+                    id={"delete.rubro." + rubro.id} variant="danger" onClick={this.handleShowModal} ><Trash size={20}/></Button>
                 </ButtonGroup>
                 </td>
                 </tr>

@@ -307,7 +307,7 @@ class CuentaCorrienteCliente extends GenericComponent {
             <Alert key="0" variant="primary" show={ showAprobacion }>
               Tiene cuentas corrientes pendientes de aprobación  <Button variant="primary" href={"/cuentaCorrienteCliente/aprobacion"} > Ver </Button>
             </Alert>
-            <h1>Cuentas Corrientes<Button variant="primary" href={"/cuentaCorrienteCliente/new"} ><Plus size={25}/></Button></h1>
+            <h1>Cuentas Corrientes<Button title="Nueva Cuenta Corriente" variant="primary" href={"/cuentaCorrienteCliente/new"} ><Plus size={25}/></Button></h1>
             {alert}
             <InputGroup className="mb-3">
               <DropdownButton variant="secondary" title="Filtrar por " id="input-group-dropdown-1">
@@ -415,11 +415,11 @@ class CuentaCorrienteCliente extends GenericComponent {
                     <td>{this.formatDate(cuentaCorrienteClienteAprobacion.fechaCreacion)}</td>
                     <td>
                       <ButtonGroup>
-                        <Button 
+                        <Button title="Aprobar Cuenta Corriente"
                           variant="success" onClick={this.handleShowApproveModal.bind(this, cuentaCorrienteClienteAprobacion)}><CheckSquare size={20}/></Button>
-                        <Button 
+                        <Button title="Ver Detalle"
                           variant="primary" href={"/cuentaCorrienteCliente/view/" + cuentaCorrienteClienteAprobacion.id} ><ZoomIn size={20}/></Button>
-                        <Button 
+                        <Button title="Cancelar Cuenta Corriente"
                           variant="danger" onClick={this.handleShowModal.bind(this, cuentaCorrienteClienteAprobacion.id) } ><Trash size={20}/></Button>
                       </ButtonGroup>
                     </td>
@@ -489,7 +489,7 @@ class CuentaCorrienteCliente extends GenericComponent {
                   </tr>
               </thead>
               <tbody>
-                  {dto.estadoCuentaCorrienteDtos.sort((a, b) => b.id - a.id).map((estado) =>
+                  {dto.estadoCuentaCorrienteDtos.filter(a => a.cantidad > 0).sort((a, b) => b.id - a.id).map((estado) =>
                       <tr>
                       <td>{estado.articulo.nombre}</td>
                       <td>{estado.cantidad}</td>
@@ -612,9 +612,9 @@ class CuentaCorrienteCliente extends GenericComponent {
                     <td>
                       <ButtonGroup>
                         <Button 
-                          variant="success" onClick={this.handleShowCreateModal.bind(this, usuario)}><CheckSquare size={20}/></Button>
+                          variant="success" title="Crear Cuenta Corriente" onClick={this.handleShowCreateModal.bind(this, usuario)}><CheckSquare size={20}/></Button>
                         <Button 
-                          variant="primary" href={"/usuario/view/" + usuario.id} ><ZoomIn size={20}/></Button>
+                          variant="primary" title="Ver Usuario" href={"/usuario/view/" + usuario.id} ><ZoomIn size={20}/></Button>
                       </ButtonGroup>
                     </td>
                     </tr>
@@ -685,7 +685,7 @@ class CuentaCorrienteCliente extends GenericComponent {
                   </tr>
               </thead>
               <tbody>
-                  {dto.estadoCuentaCorrienteDtos.sort((a, b) => b.id - a.id).map((estado) =>
+                  {dto.estadoCuentaCorrienteDtos.filter(a => a.cantidad > 0).sort((a, b) => b.id - a.id).map((estado) =>
                       <tr>
                       <td>{estado.articulo.nombre}</td>
                       <td>{estado.cantidad}</td>

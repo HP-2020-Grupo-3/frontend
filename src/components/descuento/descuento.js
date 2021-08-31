@@ -7,8 +7,7 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Alert from 'react-bootstrap/Alert';
-import Modal from 'react-bootstrap/Modal';
-import { Plus } from 'react-bootstrap-icons';
+import { Plus, Pencil, ZoomIn} from 'react-bootstrap-icons';
 import DescuentoAPI from '../descuento/descuentoAPI';
 
 class Descuento extends GenericComponent {
@@ -95,7 +94,7 @@ class Descuento extends GenericComponent {
     const { dto, alert, showModal } = this.state;
     return (
       <>
-        <h1>Descuentos<Button variant="primary" href={"/descuento/new"} ><Plus size={25}/></Button></h1>
+        <h1>Descuentos<Button title="Nuevo Descuento" variant="primary" href={"/descuento/new"} ><Plus size={25}/></Button></h1>
         {alert}
         <Table striped bordered hover>
         <thead>
@@ -103,6 +102,7 @@ class Descuento extends GenericComponent {
             <th>#</th>
             <th>Valor</th>
             <th>Habilitado</th>
+            <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -113,10 +113,10 @@ class Descuento extends GenericComponent {
                 <td>{descuento.isHabilitado ? "SI" : "NO"}</td>
                 <td>
                 <ButtonGroup>
-                  <Button 
-                    variant="primary" href={"/descuento/view/" + descuento.id} >Ver</Button>
-                  <Button 
-                    variant="primary" href={"/descuento/edit/" + descuento.id} >Editar</Button>
+                  <Button title="Ver"
+                    variant="primary" href={"/descuento/view/" + descuento.id} ><ZoomIn size={20}/></Button>
+                  <Button title="Editar"
+                    variant="primary" href={"/descuento/edit/" + descuento.id} ><Pencil size={20}/></Button>
                 </ButtonGroup>
                 </td>
                 </tr>
