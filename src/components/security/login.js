@@ -46,7 +46,7 @@ class Login extends GenericComponent {
     SecurityContext.login(dto).then(
       (result) => {
         if (result) {
-          this.setState({redirect : '/rubro'});
+          this.setState({redirect : '/venta'});
           window.location.reload();
         } else {
           this.setState({

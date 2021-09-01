@@ -249,7 +249,7 @@
   visibility: visible;
 }
 .header--3 .main__menu li.drop:hover ul.dropdown {
-    top: 100%;
+    top: 60%;
 }
 .main__menu ul.dropdown li {
   border-bottom: 1px solid #f4f4f4;
@@ -1222,7 +1222,17 @@ h4.offset__title {
   z-index: 9999;
 }
 
+.float-left-style > h1 {
+  margin-bottom: 1.5em;
+}
 
+h1 > a {
+  margin-left: 1em;
+}
+
+table > tbody > tr > td {
+  font-size: 12px;
+}
 
 
 

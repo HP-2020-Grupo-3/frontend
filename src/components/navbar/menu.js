@@ -20,7 +20,8 @@ class Menu extends React.Component {
     // FIXME: comprobacion del rol super trucha, hay que mejorar esto
     if (SecurityContext.getPrincipal() && SecurityContext.getPrincipal().role != "ROLE_USER") {
       return (
-        <div class="categories-menu mrg-xs">
+        <>
+          <div class="categories-menu mrg-xs" style={{paddingTop: "3em"}}>
             <div class="category-heading">
                 <h3> Menu</h3>
             </div>
@@ -36,6 +37,7 @@ class Menu extends React.Component {
               </ul>
             </div>
           </div>
+        </>
       );
     } else {
       return null
