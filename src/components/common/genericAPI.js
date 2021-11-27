@@ -2,7 +2,7 @@ import SecurityContext from '../security/securityContext'
 
 
 class GenericAPI {
-    static _baseUrl = "https://venidemary.herokuapp.com/";
+    static _baseUrl = "https://venidemary-backend.herokuapp.com/";
  
     static _genericRequest(endpoint, requestOptions={}) {
 
