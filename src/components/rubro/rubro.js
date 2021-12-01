@@ -111,10 +111,10 @@ class Rubro extends GenericComponent {
     }
   }
   
-  handleShowModal(event) {
+  handleShowModal(id) {
     this.setState({
       showModal: true,
-      idToDelete: (event.target.id).split(".")[2]
+      idToDelete: id
     })
   }  
   
@@ -170,7 +170,7 @@ class Rubro extends GenericComponent {
                   <Button title="Editar"
                     variant="primary" href={"/rubro/edit/" + rubro.id} ><Pencil size={20}/></Button>
                   <Button title="Eliminar"
-                    id={"delete.rubro." + rubro.id} variant="danger" onClick={this.handleShowModal} ><Trash size={20}/></Button>
+                    id={"delete.rubro." + rubro.id} variant="danger" onClick={this.handleShowModal.bind(this, rubro.id) ><Trash size={20}/></Button>
                 </ButtonGroup>
                 </td>
                 </tr>
