@@ -142,10 +142,10 @@ class Articulo extends GenericComponent {
     }
   }
   
-  handleShowModal(event) {
+  handleShowModal(id) {
     this.setState({
       showModal: true,
-      idToDelete: (event.target.id).split(".")[2]
+      idToDelete: id
     })
   }
   
@@ -230,7 +230,7 @@ class Articulo extends GenericComponent {
                     <Button 
                       variant="primary" href={"/articulo/edit/" + articulo.id} ><Pencil size={20}/></Button>
                     <Button 
-                      id={"delete.articulo." + articulo.id} variant="danger" onClick={this.handleShowModal} ><Trash size={20}/></Button>
+                      id={"delete.articulo." + articulo.id} variant="danger" onClick={this.handleShowModal.bind(this, articulo.id)} ><Trash size={20}/></Button>
                   </ButtonGroup>
                 </td>
                 </tr>
